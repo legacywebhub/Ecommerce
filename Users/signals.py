@@ -1,7 +1,7 @@
-from django.db.models.signals import post_save
-from django.contrib.auth.models import User
-from django.dispatch import receiver
-from .models import Profile
+# from django.db.models.signals import post_save
+# from django.contrib.auth.models import User
+# from django.dispatch import receiver
+# from .models import Profile
 
 
 '''
@@ -16,7 +16,7 @@ Last task is to go under apps.py module under Usersconfig class and add a functi
 '''
 
 
-
+'''
 @receiver(post_save, sender=User)
 def build_profile(sender, instance, created, **kwargs):
     if created:
