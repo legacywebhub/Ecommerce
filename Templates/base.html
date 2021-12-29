@@ -23,6 +23,27 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'themes/images/ico/apple-touch-icon-72-precomposed.png' %}">
     <link rel="apple-touch-icon-precomposed" href="{% static 'themes/images/ico/apple-touch-icon-57-precomposed.png' %}">
 	<style type="text/css" id="enject"></style>
+
+	<script type="text/javascript">
+	var user = '{{request.user}}'
+
+	function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+	}
+	const csrftoken = getCookie('csrftoken');
+	</script>
   </head>
 <body>
 <div id="header">
@@ -35,13 +56,13 @@
     {% endif %}
 	<div class="span6">
 	<div class="pull-right">
-		<a href="{% url 'Store:cart' %}"><span class="">Fr</span></a>
-		<a href="{% url 'Store:cart' %}"><span class="">Es</span></a>
+		<span class="">Fr</span>
+		<span class="">Es</span>
 		<span class="btn btn-mini">En</span>
-		<a href="{% url 'Store:cart' %}"><span>&pound;</span></a>
+		<span>&pound;</span>
 		<span class="btn btn-mini">${{ order.total }}</span>
-		<a href="{% url 'Store:cart' %}"><span class="">$</span></a>
-		<a href="{% url 'Store:cart' %}"><span class="btn btn-mini btn-primary"><i class="icon-shopping-cart icon-white"></i> [ {{ order.item_total }} ] Items in your cart </span> </a> 
+		<span class="">$</span>
+		<a href="{% url 'Store:cart' %}"><span class="btn btn-mini btn-primary"><i class="icon-shopping-cart icon-white"></i> [ {{ item_total }} ] Items in your cart </span> </a> 
 	</div>
 	</div>
 </div>
@@ -53,7 +74,7 @@
 	<span class="icon-bar"></span>
 </a>
   <div class="navbar-inner">
-    <a class="brand" href="index.html"><img src="{% static 'themes/images/logo.png' %}" alt="Bootsshop"/></a>
+    <a class="brand" href="{% url 'Store:index' %}"><img src="{% static 'themes/images/logo.png' %}" alt="Bootsshop"/></a>
 		<form class="form-inline navbar-search" method="post" action="products.html" >
 		<input id="srchFld" class="srchTxt" type="text" />
 		  <select class="srchTxt">
@@ -165,5 +186,14 @@
 	<script src="{% static 'themes/js/bootshop.js' %}"></script>
     <script src="{% static 'themes/js/jquery.lightbox-0.5.js' %}"></script>
 
+	<script src="{% static 'themes/js/cart.js' %}"></script>
+
+	<script type="text/javascript">
+	var shipping = "{{order.shipping}}"
+
+	if (shipping == 'False'){
+		document.getElementById('shipping-info').innerHTML = '';
+	} 
+	</script>
 </body>
 </html>

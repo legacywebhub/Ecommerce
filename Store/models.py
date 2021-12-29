@@ -110,6 +110,15 @@ class Order(models.Model):
         total = self.cart_total - (self.discount_total + self.tax_total)
         return total
     
+    @property
+    def shipping(self):
+        shipping = False
+        orderitems = self.orderitem_set.all()
+        for i in orderitems:
+            if i.product.digital == True:
+                shipping = True
+        return shipping
+    
     
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
