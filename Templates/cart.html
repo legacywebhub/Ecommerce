@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-<div id="mainBody">
-	<div class="container">
-	<div class="row">
 {% block sidebar %}
 <!-- Sidebar ================================================== -->
 <div id="sidebar" class="span3">
@@ -75,7 +72,7 @@
 		<li><a href="index.html">Home</a> <span class="divider">/</span></li>
 		<li class="active"> SHOPPING CART</li>
     </ul>
-	<h3>  SHOPPING CART [ <small>{{order.item_total}} Item(s) </small>]<a href="products.html" class="btn btn-large pull-right"><i class="icon-arrow-left"></i> Continue Shopping </a></h3>	
+	<h3>  SHOPPING CART [ <small>{{order.item_total}} Item(s) </small>]<a href="{% url 'Store:index' %}" class="btn btn-large pull-right"><i class="icon-arrow-left"></i> Continue Shopping </a></h3>	
 	<hr class="soft"/>
 	<table class="table table-bordered">
 		<tr><th> I AM ALREADY REGISTERED  </th></tr>
@@ -127,7 +124,7 @@
                   <td> <img width="60" src="{{ item.product.image1.url }}" alt="product image"/></td>
                   <td>{{ item.product.name }}</td>
 				  <td>
-					<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="remove" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
+					<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="remove" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
 				  </td>
                   <td>${{ item.product.price }}</td>
                   <td>${{ item.product.discount }}</td>

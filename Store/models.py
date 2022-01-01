@@ -139,9 +139,12 @@ class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
     address = models.CharField(max_length=200, null=False, blank=False)
+    apartment = models.CharField(max_length=200, null=False, blank=False, default='apartment')
     city = models.CharField(max_length=200, null=False, blank=False)
     state = models.CharField(max_length=200, null=False, blank=False)
     zipcode = models.CharField(max_length=200, null=False, blank=False)
+    phone1 = models.IntegerField(null=False, blank=False)
+    phone2 = models.IntegerField(null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -156,4 +159,4 @@ class Message(models.Model):
     date_sent = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.date_sent
+        return str(self.date_sent)

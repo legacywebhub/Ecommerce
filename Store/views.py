@@ -3,9 +3,15 @@ from django.contrib import messages
 from .models import *
 from django.http import JsonResponse
 import json
+from django.core.paginator import Paginator
 
 # Create your views here.
 def index(request):
+    if request.method == 'POST':
+        search = request.POST['search']
+        print(search)
+        return redirect('/products/'+search)
+
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
@@ -24,18 +30,34 @@ def index(request):
             'tax_total':0,
             'item_total':0,
             'total':0,
-            
         }
         item_total = order['item_total']
         total = order['total']
-        
-    products = Product.objects.all()
+    #   products = Product.objects.all().order_by('?')
+    p = Paginator(Product.objects.all(), 3)
+    page = request.GET.get('page')
+    products = p.get_page(page)
     context = {
         'products': products,
         'item_total': item_total,
         'total': total,
     }
     return render(request, 'index.html', context)
+
+
+def products(request, search):
+    products_list = Product.objects.filter(name__contains=search) or Product.objects.filter(category=search)
+    products_count = products_list.count
+    p = Paginator(products_list, 3)
+    page = request.GET.get('page')
+    products = p.get_page(page)
+    
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+    
+    context = {'search':search,'products':products,'products_count':products_count}
+    return render(request, 'products.html', context)
 
 
 def cart(request):
@@ -60,6 +82,10 @@ def cart(request):
         }
         item_total = order['item_total']
         total = order['total']
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
     context = {
         'items':items,
         'order':order,
@@ -70,6 +96,10 @@ def cart(request):
 
 def detail(request, pk):
     product = Product.objects.get(id=pk)
+    
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
     context = {
         'product': product,
     }
@@ -77,21 +107,26 @@ def detail(request, pk):
 
 def contact(request):
     if request.method == 'POST':
-        name = request.POST['name']
-        location = request.POST['location']
-        email = request.POST['email']
-        subject = request.POST['subject']
-        message = request.POST['message']
-        
-        try:
-            email.index('@') and email.index('.')
-        except ValueError:
-            messages.info(request, 'Your email is not valid')
-        else:
-            message = Message.objects.create(name=name, location=location, email=email, subject=subject, message=message)
-            message.save()
-            messages.info(request, 'Your message was sent successfully')
-            return redirect('Store:contact')    
+        if 'search' in request.POST:
+            search = request.POST['search']
+            return redirect('/products/'+search)
+        elif 'message' in request.POST:
+            name = request.POST['name']
+            location = request.POST['location']
+            email = request.POST['email']
+            subject = request.POST['subject']
+            message = request.POST['message']
+
+            try:
+                email.index('@') and email.index('.')
+            except ValueError:
+                messages.info(request, 'Your email is not valid')
+            else:
+                message = Message.objects.create(name=name, location=location, email=email, subject=subject, message=message)
+                message.save()
+                messages.info(request, 'Your message was sent successfully')
+                return redirect('Store:contact')
+
     return render(request, 'contact.html')
 
 def checkout(request):
@@ -132,7 +167,7 @@ def updateItem(request):
     
 
     if action == 'remove':
-        orderItem.quantity - 1
+        orderItem.quantity = orderItem.quantity - 1
         return JsonResponse('Item was removed', safe=False)
     elif action == 'add':
         orderItem.quantity = (orderItem.quantity + 1)

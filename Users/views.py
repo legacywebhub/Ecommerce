@@ -21,7 +21,6 @@ def register(request):
     }
     return render(request, 'register.html', context)
 
-
-@login_required
-def profile(request, user):
-    return render(request, 'profile.html')
+# @login_required
+# def profile(request, user):
+#     return render(request, 'profile.html')

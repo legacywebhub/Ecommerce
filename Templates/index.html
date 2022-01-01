@@ -75,7 +75,7 @@
 	<ul id="sideManu" class="nav nav-tabs nav-stacked">
 		<li class="subMenu open"><a> ELECTRONICS [230]</a>
 			<ul>
-			<li><a class="active" href="products.html"><i class="icon-chevron-right"></i>Cameras (100) </a></li>
+			<li><a class="active" href="/products/camera"><i class="icon-chevron-right"></i>Cameras ({{results_count}}) </a></li>
 			<li><a href="products.html"><i class="icon-chevron-right"></i>Computers, Tablets & laptop (30)</a></li>
 			<li><a href="products.html"><i class="icon-chevron-right"></i>Mobile Phone (80)</a></li>
 			<li><a href="products.html"><i class="icon-chevron-right"></i>Sound & Vision (15)</a></li>
@@ -329,6 +329,22 @@
 				</li>
 				{% endfor %}
 			  </ul>
+			  <br>
+			  <br>
+			  <br>
+			  <div class="pagination" style="display:flex; justify-content:center; align-items:center">
+			  <ul>
+			  {% if products.has_previous %}
+			  <li style="font-size:20px;"><a href="?page=1">&lsaquo; First</a></li>
+			  <li style="font-size:20px;"><a href="?page={{ products.previous_page_number }}">Previous</a></li>
+			  {% endif %}
+			   <span style="margin-left: 3px; padding: 5px 30px; font-weight: bold; border:solid #333 .5px">Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+			  {% if products.has_next %}
+			  <li style="font-size:20px;"><a href="?page={{ products.next_page_number }}">Next</a></li>
+			  <li style="font-size:20px;"><a href="?page={{ products.paginator.num_pages }}">Last &rsaquo;</a></li>
+			  {% endif %}
+			  </ul>
+			  </div>
 		</div>
 		</div>
 	</div>
