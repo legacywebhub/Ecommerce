@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -132,3 +133,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR / 'Media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'Store:index'
 LOGIN_URL = 'Users:login'
+
+# Payment Integration
+SECRET_KEY = config('SECRET_KEY')
+PUBLIC_KEY = config('PUBLIC_KEY')

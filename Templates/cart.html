@@ -73,38 +73,7 @@
 		<li class="active"> SHOPPING CART</li>
     </ul>
 	<h3>  SHOPPING CART [ <small>{{order.item_total}} Item(s) </small>]<a href="{% url 'Store:index' %}" class="btn btn-large pull-right"><i class="icon-arrow-left"></i> Continue Shopping </a></h3>	
-	<hr class="soft"/>
-	<table class="table table-bordered">
-		<tr><th> I AM ALREADY REGISTERED  </th></tr>
-		 <tr> 
-		 <td>
-			<form class="form-horizontal">
-				<div class="control-group">
-				  <label class="control-label" for="inputUsername">Username</label>
-				  <div class="controls">
-					<input type="text" id="inputUsername" placeholder="Username">
-				  </div>
-				</div>
-				<div class="control-group">
-				  <label class="control-label" for="inputPassword1">Password</label>
-				  <div class="controls">
-					<input type="password" id="inputPassword1" placeholder="Password">
-				  </div>
-				</div>
-				<div class="control-group">
-				  <div class="controls">
-					<button type="submit" class="btn">Sign in</button> OR <a href="register.html" class="btn">Register Now!</a>
-				  </div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-					  <a href="forgetpass.html" style="text-decoration:underline">Forgot password ?</a>
-					</div>
-				</div>
-			</form>
-		  </td>
-		  </tr>
-	</table>		
+	<hr class="soft"/>		
 			
 	<table class="table table-bordered">
               <thead>
@@ -124,7 +93,7 @@
                   <td> <img width="60" src="{{ item.product.image1.url }}" alt="product image"/></td>
                   <td>{{ item.product.name }}</td>
 				  <td>
-					<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="remove" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
+					<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="subtract" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
 				  </td>
                   <td>${{ item.product.price }}</td>
                   <td>${{ item.product.discount }}</td>
@@ -143,58 +112,12 @@
                   <td> ${{ order.tax_total }}</td>
                 </tr>
 				 <tr>
-                  <td colspan="6" style="text-align:right"><strong>TOTAL (${{order.cart_total}} - ${{order.discount_total}} + ${{order.tax_total}}) =</strong></td>
+                  <td colspan="6" style="text-align:right"><strong>TOTAL (${{order.price_total}} - ${{order.discount_total}} + ${{order.tax_total}}) =</strong></td>
                   <td class="label label-important" style="display:block"> <strong> ${{ order.total }} </strong></td>
                 </tr>
 				</tbody>
             </table>
-		
-		
-            <table class="table table-bordered">
-			<tbody>
-				 <tr>
-                  <td> 
-				<form class="form-horizontal">
-				<div class="control-group">
-				<label class="control-label"><strong> VOUCHERS CODE: </strong> </label>
-				<div class="controls">
-				<input type="text" class="input-medium" placeholder="CODE">
-				<button type="submit" class="btn"> ADD </button>
-				</div>
-				</div>
-				</form>
-				</td>
-                </tr>
-				
-			</tbody>
-			</table>
-			
-			<table class="table table-bordered">
-			 <tr><th>ESTIMATE YOUR SHIPPING </th></tr>
-			 <tr> 
-			 <td>
-				<form class="form-horizontal">
-				  <div class="control-group">
-					<label class="control-label" for="inputCountry">Country </label>
-					<div class="controls">
-					  <input type="text" id="inputCountry" placeholder="Country">
-					</div>
-				  </div>
-				  <div class="control-group">
-					<label class="control-label" for="inputPost">Post Code/ Zipcode </label>
-					<div class="controls">
-					  <input type="text" id="inputPost" placeholder="Postcode">
-					</div>
-				  </div>
-				  <div class="control-group">
-					<div class="controls">
-					  <button type="submit" class="btn">ESTIMATE </button>
-					</div>
-				  </div>
-				</form>				  
-			  </td>
-			  </tr>
-            </table>		
+		<br><br><br>		
 	<a href="{% url 'Store:index' %}" class="btn btn-large"><i class="icon-arrow-left"></i> Continue Shopping </a>
 	<a href="{% url 'Store:checkout' %}" class="btn btn-large pull-right">Next <i class="icon-arrow-right"></i></a>
 	

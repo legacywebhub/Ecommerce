@@ -23,10 +23,20 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'themes/images/ico/apple-touch-icon-72-precomposed.png' %}">
     <link rel="apple-touch-icon-precomposed" href="{% static 'themes/images/ico/apple-touch-icon-57-precomposed.png' %}">
 	<style type="text/css" id="enject"></style>
+	<style>
+	.hidden {
+		display:none;
+	}
+	</style>
+
+	{% block style %}
+	{% endblock %}
 
 	<script type="text/javascript">
-	var user = '{{request.user}}'
+	let user = '{{request.user}}'
 
+	// This is a function from django docs to generate csrftoken and set as browser cookies
+	// This can also get cookies from frontend by passing the cookie name as parameter to getCookie() function
 	function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -43,6 +53,26 @@
     return cookieValue;
 	}
 	const csrftoken = getCookie('csrftoken');
+
+	// Generating a unique code
+	function uuidv4(){
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+			let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+	}
+
+	// Getting a cookie named device in our browser
+	// And setting it to a variable device
+	let device = getCookie('device');
+	
+
+	// If device is not set or null, we want to set it to our unique code
+	if (device == null || device == undefined) {
+		device = uuidv4()
+	}
+
+	document.cookie = `device=${device};domain=;path=/`;
 	</script>
   </head>
 <body>
@@ -162,12 +192,7 @@
 
 	<script src="{% static 'themes/js/cart.js' %}"></script>
 
-	<script type="text/javascript">
-	var shipping = "{{order.shipping}}"
-
-	if (shipping == 'False'){
-//		document.getElementById('shipping-info').innerHTML = '';
-	} 
-	</script>
+	{% block script %}
+	{% endblock %}
 </body>
 </html>

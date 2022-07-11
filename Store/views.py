@@ -4,39 +4,33 @@ from .models import *
 from django.http import JsonResponse
 import json
 from django.core.paginator import Paginator
+from datetime import datetime
+from django.conf import settings
+
 
 # Create your views here.
 def index(request):
-    if request.method == 'POST':
-        search = request.POST['search']
-        print(search)
-        return redirect('/products/'+search)
-
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items =  order.orderitem_set.all()
-        item_total = order.item_total
-        total = order.total
-    else:
-        '''
-        This is for non logged in users. 
-        Temporal solution for error generated when user isn't logged in
-        '''
-        items = []
-        order = {
-            'cart_total':0,
-            'discount_total':0,
-            'tax_total':0,
-            'item_total':0,
-            'total':0,
-        }
-        item_total = order['item_total']
-        total = order['total']
-    #   products = Product.objects.all().order_by('?')
     p = Paginator(Product.objects.all(), 3)
     page = request.GET.get('page')
     products = p.get_page(page)
+
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    items =  order.orderitem_set.all()
+    item_total = order.item_total
+    total = order.total
+
+
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
     context = {
         'products': products,
         'item_total': item_total,
@@ -51,41 +45,48 @@ def products(request, search):
     p = Paginator(products_list, 3)
     page = request.GET.get('page')
     products = p.get_page(page)
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    item_total = order.item_total
+    total = order.total
     
     if request.method == 'POST':
         search = request.POST['search']
         return redirect('/products/'+search)
     
-    context = {'search':search,'products':products,'products_count':products_count}
+    context = {
+        'search':search,
+        'products':products,
+        'products_count':products_count,
+        'item_total': item_total,
+        'total': total
+    }
     return render(request, 'products.html', context)
 
 
 def cart(request):
-    if request.user.is_authenticated:
+    try:
+        # Trying to get customer from authenticated user
         customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items =  order.orderitem_set.all()
-        item_total = order.item_total
-        total = order.total
-    else:
-        '''
-        This is for non logged in users. 
-        Temporal solution for error generated when user isn't logged in
-        '''
-        items = []
-        order = {
-            'cart_total':0,
-            'discount_total':0,
-            'tax_total':0,
-            'item_total':0,
-            'total':0,
-        }
-        item_total = order['item_total']
-        total = order['total']
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    items =  order.orderitem_set.all()
+    item_total = order.item_total
+    total = order.total
         
     if request.method == 'POST':
         search = request.POST['search']
         return redirect('/products/'+search)
+
     context = {
         'items':items,
         'order':order,
@@ -96,16 +97,39 @@ def cart(request):
 
 def detail(request, pk):
     product = Product.objects.get(id=pk)
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    item_total = order.item_total
+    total = order.total
     
     if request.method == 'POST':
         search = request.POST['search']
         return redirect('/products/'+search)
     context = {
         'product': product,
+        'item_total': item_total,
+        'total':total
     }
     return render(request, 'product_details.html', context)
 
 def contact(request):
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    item_total = order.item_total
+    total = order.total
+
     if request.method == 'POST':
         if 'search' in request.POST:
             search = request.POST['search']
@@ -127,29 +151,29 @@ def contact(request):
                 messages.info(request, 'Your message was sent successfully')
                 return redirect('Store:contact')
 
-    return render(request, 'contact.html')
+    context = {'item_total':item_total, 'total':total}
+    return render(request, 'contact.html', context)
 
 def checkout(request):
-    if request.user.is_authenticated:
+    try:
+        # Trying to get customer from authenticated user
         customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items =  order.orderitem_set.all()
-    else:
-        '''
-        This is for non logged in users. 
-        Temporal solution for error generated when user isn't logged in
-        '''
-        items = []
-        order = {
-            'cart_total':0,
-            'discount_total':0,
-            'tax_total':0,
-            'item_total':0,
-            'total':0,
-        }
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    items =  order.orderitem_set.all()
+    item_total = order.item_total
+    total = order.total
+
     context = {
         'items':items,
-        'order':order,
+        'order':order, 
+        'item_total': item_total, 
+        'total':total, 
+        'customer':customer, 
+        'public_key': settings.PUBLIC_KEY
     }
     return render(request, 'checkout.html', context)
 
@@ -160,23 +184,92 @@ def updateItem(request):
     print('product',productId)
     print('action',action)
     
-    customer = request.user.customer
+    # Getting product
     product = Product.objects.get(id=productId)
+
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+
+
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
     
 
-    if action == 'remove':
-        orderItem.quantity = orderItem.quantity - 1
-        return JsonResponse('Item was removed', safe=False)
+    # Determines what action to take
+    if action == 'subtract':
+        orderItem.quantity -= 1
     elif action == 'add':
-        orderItem.quantity = (orderItem.quantity + 1)
+        orderItem.quantity += 1
     elif action == 'delete':
         orderItem.delete()
-        return JsonResponse('Item was deleted', safe=False)
         
     orderItem.save()
     
+    # Deleting item if quantity is less than 1
     if orderItem.quantity <= 0:
         orderItem.delete()
-    return JsonResponse('Item was added', safe=False)
+    return JsonResponse('Item was manipulated', safe=False)
+
+
+def processOrder(request):
+    # Generation a unique code used as transaction id
+    # transaction_id = datetime.now().timestamp().replace('.', '')
+    data = json.loads(request.body)
+    print('data:', data)
+    first_name = data['shippingFormData']['first-name']
+    last_name = data['shippingFormData']['last-name']
+    phone2 = data['shippingFormData']['phone2']
+
+    # Checking to see if phone2 is empty since it isn't mandactory
+    # Set as None if an empty string
+    if phone2 == '':
+        phone2 = None
+
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+        # Populating the customer field
+        customer.name = f'{first_name} {last_name}'
+        customer.email = data['shippingFormData']['email']
+        customer.save()
+        print('customer saved')
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    order.transaction_id = data['shippingFormData']['transaction-id']
+    total = data['shippingFormData']['total']
+
+    # Making sure total on the frontend equals total on the backend
+    # Frontend may be manipulated using browser inspection tool
+    if total == order.total:
+        order.complete = True
+    order.save()
+
+    print('order saved')
+
+    # Saving shipping detail of customer
+    if order.shipping == True:
+        shipping_details = ShippingAddress.objects.create(
+            customer=customer,
+            order=order,
+            address=data['shippingFormData']['address'],
+            apartment=data['shippingFormData']['apartment'],
+            city=data['shippingFormData']['city'],
+            state=data['shippingFormData']['state'],
+            country=data['shippingFormData']['country'],
+            zipcode=data['shippingFormData']['zipcode'],
+            phone1=data['shippingFormData']['phone1'],
+            phone2=phone2,
+        )
+        shipping_details.save()
+
+    print('shipping details saved')
+    
+    return JsonResponse('Payment submitted...', safe=False)

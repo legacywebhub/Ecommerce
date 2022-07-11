@@ -3,12 +3,17 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=200, null=True)
     email = models.EmailField(max_length=200, null=True)
+    device = models.CharField(max_length=25, null=True)
     
     def __str__(self):
-        return self.name
+        if self.name:
+            name = self.name
+        else:
+            name = self.device
+        return str(name)
     
 class Product(models.Model):
     color = (
@@ -71,20 +76,20 @@ class Product(models.Model):
         return url
     
     
-    
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=100, null=True)
+    delivered = models.BooleanField(default=False)
     
     def __str__(self):
         return str(self.id)
-    
+
     @property
-    def cart_total(self):
+    def price_total(self):
         orderitems = self.orderitem_set.all()
-        total = sum([item.price_total for item in orderitems])
+        total = sum([item.item_price_total for item in orderitems])
         return  total
     
     @property
@@ -103,11 +108,16 @@ class Order(models.Model):
     def item_total(self):
         orderitems = self.orderitem_set.all()
         total = sum([item.quantity for item in orderitems])
+        # Resetting order items after delivery or delivered status has been set to true
+        if self.delivered == True:
+            for i in orderitems:
+                i.quantity = 0
+                total = i.quantity
         return  total
     
     @property
     def total(self):
-        total = self.cart_total - (self.discount_total + self.tax_total)
+        total = self.price_total - (self.discount_total + self.tax_total)
         return total
     
     @property
@@ -115,7 +125,7 @@ class Order(models.Model):
         shipping = False
         orderitems = self.orderitem_set.all()
         for i in orderitems:
-            if i.product.digital == True:
+            if i.product.digital == False:
                 shipping = True
         return shipping
     
@@ -130,7 +140,7 @@ class OrderItem(models.Model):
         return self.product.name
     
     @property
-    def price_total(self):
+    def item_price_total(self):
         total = self.product.price * self.quantity
         return total
     
@@ -142,13 +152,14 @@ class ShippingAddress(models.Model):
     apartment = models.CharField(max_length=200, null=False, blank=False, default='apartment')
     city = models.CharField(max_length=200, null=False, blank=False)
     state = models.CharField(max_length=200, null=False, blank=False)
+    country = models.CharField(max_length=200, null=False, blank=False)
     zipcode = models.CharField(max_length=200, null=False, blank=False)
     phone1 = models.IntegerField(null=False, blank=False)
     phone2 = models.IntegerField(null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.address
+        return f'{self.customer.name} {self.address}'
     
 class Message(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
@@ -159,4 +170,4 @@ class Message(models.Model):
     date_sent = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return str(self.date_sent)
+        return f'{self.date_sent}'
