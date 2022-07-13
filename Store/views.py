@@ -7,13 +7,16 @@ from django.core.paginator import Paginator
 from datetime import datetime
 from django.conf import settings
 
+# General variables
+categories = Category.objects.all()
+hot_products = Product.objects.filter(hot=True).order_by('?')[:3]
 
 # Create your views here.
 def index(request):
     p = Paginator(Product.objects.all(), 3)
     page = request.GET.get('page')
     products = p.get_page(page)
-
+    
     try:
         # Trying to get customer from authenticated user
         customer = request.user.customer
@@ -35,12 +38,14 @@ def index(request):
         'products': products,
         'item_total': item_total,
         'total': total,
+        'categories' : categories,
+        'hot_products':hot_products
     }
     return render(request, 'index.html', context)
 
 
 def products(request, search):
-    products_list = Product.objects.filter(name__contains=search) or Product.objects.filter(category=search)
+    products_list = Product.objects.filter(name__contains=search)
     products_count = products_list.count
     p = Paginator(products_list, 3)
     page = request.GET.get('page')
@@ -65,9 +70,46 @@ def products(request, search):
         'products':products,
         'products_count':products_count,
         'item_total': item_total,
-        'total': total
+        'total': total,
+        'categories' : categories,
+        'hot_products':hot_products
     }
     return render(request, 'products.html', context)
+
+
+
+def category(request, category):
+    products_list = Product.objects.filter(category=category)
+    category = ProductCategory.objects.get(id=category)
+    products_count = products_list.count
+    p = Paginator(products_list, 3)
+    page = request.GET.get('page')
+    products = p.get_page(page)
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    item_total = order.item_total
+    total = order.total
+    
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+    
+    context = {
+        'products':products,
+        'products_count':products_count,
+        'item_total': item_total,
+        'total': total,
+        'category': category,
+        'categories' : categories,
+        'hot_products':hot_products
+    }
+    return render(request, 'product-category.html', context)
 
 
 def cart(request):
@@ -91,7 +133,9 @@ def cart(request):
         'items':items,
         'order':order,
         'item_total': item_total,
-        'total': total
+        'total': total,
+        'categories' : categories,
+        'hot_products':hot_products
     }
     return render(request, 'cart.html', context)
 
@@ -114,7 +158,9 @@ def detail(request, pk):
     context = {
         'product': product,
         'item_total': item_total,
-        'total':total
+        'total':total,
+        'categories' : categories,
+        'hot_products':hot_products
     }
     return render(request, 'product_details.html', context)
 
@@ -173,7 +219,9 @@ def checkout(request):
         'item_total': item_total, 
         'total':total, 
         'customer':customer, 
-        'public_key': settings.PUBLIC_KEY
+        'public_key': settings.PUBLIC_KEY,
+        'categories' : categories,
+        'hot_products':hot_products
     }
     return render(request, 'checkout.html', context)
 

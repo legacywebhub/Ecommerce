@@ -9,10 +9,14 @@
 {% block body %}
 <div class="span9">
     <ul class="breadcrumb">
-		<li><a href="index.html">Home</a> <span class="divider">/</span></li>
+		<li><a href="/">Home</a> <span class="divider">/</span></li>
 		<li class="active">Products</li>
     </ul>
-	<h3>You searched for {{search}}<small class="pull-right"> {{products_count}} products are available </small></h3>	
+	<h3>Product Category - <span class="category">{{category.product_category}}</span><small class="pull-right"> {{products_count}} products are available </small></h3>	
+	<hr class="soft"/>
+	<p>
+		Nowadays the <span style="text-transform: lowercase;">{{category.category.category}}</span> industry is one of the most successful business spheres.We always stay in touch with the latest <span style="text-transform: lowercase;">{{category.category.category}}</span> tendencies - that is why our goods are so popular and we have a great number of faithful customers all over the country.
+	</p>
 	<hr class="soft"/>
 	<form class="form-horizontal span6">
 		<div class="control-group">
@@ -53,7 +57,7 @@
 			<form class="form-horizontal qtyFrm">
 			<h3> ${{ product.price }}</h3>
 			<label class="checkbox">
-				<input type="checkbox">  Adds product to compair
+				<input type="checkbox">  Adds product to compare
 			</label><br/>
 			
 			  <a href="#" class="btn btn-large btn-primary update-cart" data-product="{{product.id}}" data-action="add"> Add to <i class=" icon-shopping-cart"></i></a>
@@ -65,7 +69,7 @@
 		<hr class="soft"/>
 		{% endfor %}
 		{% else %}
-		<h3>No products available for {{search}}</h3>
+		<h3>No products available for <span class="category">{{category.product_category}}</span></h3>
 		{% endif %}
 	</div>
 
@@ -79,7 +83,7 @@
 				<div class="caption">
 				  <h5>{{ product }}</h5>
 				  <p> 
-					{{ product.description|truncatewords:5 }} 
+					{{ product.description|truncatewords:15 }} 
 				  </p>
 				   <h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{product.id}}" data-action="add" href="#">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{ product.price }}</a></h4>
 				</div>
@@ -87,7 +91,7 @@
 			</li>
 			{% endfor %}
 			{% else %}
-			<h3 style="margin-left:30px;">No products available for {{search}}</h3>
+			<h3 style="margin-left:30px;">No products available for <span class="category">{{category.product_category}}</span></h3>
 			{% endif %}
 		  </ul>
 	<hr class="soft"/>
