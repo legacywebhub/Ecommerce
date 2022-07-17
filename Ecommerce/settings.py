@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Store',
-    'Users',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +71,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Ecommerce.wsgi.application'
+
+# Custom user for project
+AUTH_USER_MODEL = 'Store.MyUser'
 
 
 # Database

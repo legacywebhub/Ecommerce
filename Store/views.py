@@ -6,6 +6,7 @@ import json
 from django.core.paginator import Paginator
 from datetime import datetime
 from django.conf import settings
+from django.contrib.auth.models import auth
 
 # General variables
 categories = Category.objects.all()
@@ -163,6 +164,49 @@ def detail(request, pk):
         'hot_products':hot_products
     }
     return render(request, 'product_details.html', context)
+
+
+
+def login(request):
+    if request.method == "POST":
+        if 'register-submit' in request.POST:
+            first_name = request.POST['first-name']
+            last_name = request.POST['last-name']
+            email = request.POST['register-email']
+            password1 = request.POST['password1']
+            password2 = request.POST['password2']
+
+            if password2 == password1:
+                if MyUser.objects.filter(email=email).exists():
+                    messages.error(request, 'Sorry this email has already been taken!')
+                else:
+                    user = MyUser.objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password2)
+                    user.save()
+                    customer = Customer.objects.create(user=user, name=f'{user.first_name} {user.last_name}', email=user.email)
+                    customer.save()
+                    messages.success(request, 'Your account has successfully been created... you can now sign in!')
+            else:
+                messages.error(request, 'Passwords does not match... Please try again')   
+        elif 'login-submit' in request.POST:
+            email = request.POST['login-email']
+            password = request.POST['password']
+
+            user = auth.authenticate(email=email, password=password)
+            if user is not None:
+                auth.login(request, user)
+                return redirect('/')
+            else:
+                messages.error(request, 'Invalid credentials..   Please try again')
+    context = {}
+    return render(request, 'login.html', context)
+
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect('/')
+
+
 
 def contact(request):
     try:

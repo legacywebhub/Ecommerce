@@ -1,6 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block style %}
+<style>
+	.message {
+		text-align: center;
+		margin: 20px auto;
+		text-transform: capitalize;
+		font-style: italic;
+		font-size: medium;
+	}
+</style>
+{% endblock %}
+
 {% block sidebar %}
 {% include 'sidebar.html' %}
 {% endblock  %}
@@ -8,32 +20,83 @@
 {% block body %}
 	<div class="span9">
     <ul class="breadcrumb">
-		<li><a href="index.html">Home</a> <span class="divider">/</span></li>
+		<li><a href="/">Home</a> <span class="divider">/</span></li>
 		<li class="active">Login</li>
     </ul>
 	<h3> Login</h3>	
+	{% for message in messages %}
+	<p {% if message.tags %}class="message {{ message.tags }}"{% endif %}>{{message}}</p>
+	{% endfor %}
 	<hr class="soft"/>
-	
+
 	<div class="row">
+		<div class="span4">
+			<div class="well">
+			<h5>CREATE YOUR ACCOUNT</h5><br/>
+			Enter your e-mail address to create an account.<br/><br/><br/>
+			<form method="post">
+			{% csrf_token %}
+			<div class="control-group">
+				<label class="control-label" for="first-name">First Name</label>
+				<div class="controls">
+				  <input class="span3"  type="text" id="first-name" name="first-name" placeholder="First name">
+				</div>
+			  </div>
+			  <div class="control-group">
+				<label class="control-label" for="last-name">Last Name</label>
+				<div class="controls">
+				  <input class="span3"  type="text" id="last-name" name="last-name" placeholder="Last Name">
+				</div>
+			  </div>
+			  <div class="control-group">
+				<label class="control-label" for="register-email">E-mail address</label>
+				<div class="controls">
+				  <input class="span3"  type="text" id="register-email" name="register-email" placeholder="Email">
+				</div>
+			  </div>
+			  <div class="control-group">
+				<label class="control-label" for="password1">Enter Password</label>
+				<div class="controls">
+				  <input class="span3"  type="password" id="password1" name="password1" placeholder="Password">
+				</div>
+			  </div>
+			  <div class="control-group">
+				<label class="control-label" for="password2">Confirm Password</label>
+				<div class="controls">
+				  <input class="span3"  type="password" id="password2" name="password2" placeholder="Confirm Password">
+				</div>
+			  </div>
+			  <div class="controls">
+			  <button type="submit" class="btn block" name="register-submit">Create Your Account</button>
+			  </div>
+			</form>
+		</div>
+		</div>
 		<div class="span1"> &nbsp;</div>
 		<div class="span4">
 			<div class="well">
-			<h5>Enter Your Details</h5>
-			<form method="POST">
-			{% csrf_token %}
-    		<div>
-			{% for message in messages %}
-			{{ message }}
-			{% endfor %}
-			<form method="POST">
-			{% csrf_token %}
-			{{ form }}
-			<div style="margin-top:15px;">
-			<button type="submit" id="form-button">Login</button>
-			</div>
-            </form>
-            </div>
+			<h5>ALREADY REGISTERED ?</h5>
+			<form method="post">
+				{% csrf_token %}
+			  <div class="control-group">
+				<label class="control-label" for="login-email">Email</label>
+				<div class="controls">
+				  <input class="span3"  type="text" id="login-email" name="login-email" placeholder="Email">
+				</div>
+			  </div>
+			  <div class="control-group">
+				<label class="control-label" for="password">Password</label>
+				<div class="controls">
+				  <input type="password" class="span3"  id="password" name="password" placeholder="Password">
+				</div>
+			  </div>
+			  <div class="control-group">
+				<div class="controls">
+				  <button type="submit" class="btn" name="login-submit">Sign in</button> <a href="forgetpass.html">Forget password?</a>
+				</div>
+			  </div>
+			</form>
 		</div>
 		</div>
-	</div>
+	</div>	
 {% endblock %}

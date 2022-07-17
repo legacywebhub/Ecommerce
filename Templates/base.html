@@ -30,6 +30,15 @@
 	.category {
 		text-transform: capitalize;
 	}
+	.error {
+		color: rgba(255, 0, 0, 0.808);
+	}
+	.success {
+		color: rgba(1, 170, 1, 0.801);
+	}
+	.info {
+		color: rgba(3, 51, 211, 0.705);
+	}
 	</style>
 
 	{% block style %}
@@ -83,7 +92,7 @@
 <div class="container">
 <div id="welcomeLine" class="row">
     {% if user.is_authenticated %}
-	<div class="span6">Welcome! <strong>{{ user.username }}</strong></div>
+	<div class="span6">Welcome! <strong>{{ user.first_name }}</strong></div>
     {% else %}
     <div class="span6">Welcome! <strong>user</strong></div>
     {% endif %}
@@ -119,9 +128,9 @@
 	 <li class=""><a href="{% url 'Store:contact' %}">Contact</a></li>
 	 <li class="">
 	 {% if user.is_authenticated %}
-	 <a href="{% url 'Users:logout' %}" role="button" data-toggle="modal" style="padding-right:0"><span class="btn btn-large btn-success">Logout</span></a>
+	 <a href="{% url 'Store:logout' %}" role="button" data-toggle="modal" style="padding-right:0"><span class="btn btn-large btn-success">Logout</span></a>
 	 {% else %}
-	 <a href="{% url 'Users:login' %}" role="button" data-toggle="modal" style="padding-right:0"><span class="btn btn-large btn-success">Login</span></a>
+	 <a href="{% url 'Store:login' %}" role="button" data-toggle="modal" style="padding-right:0"><span class="btn btn-large btn-success">Login</span></a>
 	 {% endif %}
 	</li>
     </ul>

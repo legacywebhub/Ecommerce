@@ -1,16 +1,108 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
+class MyUserManager(BaseUserManager):
+    # Determines how to create our user model and validations
+    def create_user(self, first_name, last_name, email, password=None):
+        # Use this check for as many field you want
+        if not first_name:
+            raise ValueError("first name is required")
+        if not last_name:
+            raise ValueError("last name is required")
+        if not email:
+            raise ValueError("email is required")
+
+
+        user = self.model(
+            # normalize_email ensures our email is properly formatted
+            email = self.normalize_email(email),
+            first_name = first_name,
+            last_name = last_name,
+        )
+        # Setting password for user
+        user.set_password(password)
+        # Saving user to database
+        user.save(using=self._db)
+        # Return user after saving
+        return user
+
+    # Determines how to create superuser
+    def create_superuser(self, first_name, last_name, email, password=None):
+        user = self.create_user(
+            email = self.normalize_email(email),
+            first_name = first_name,
+            last_name = last_name,
+            password=password
+        )
+        # Granting permissions to the super user
+        user.is_staff = True
+        user.is_superuser = True
+        # Saving user to database
+        user.save(using=self._db)
+        # Return user after saving
+        return user
+
+    '''
+    Make sure to set this manager as the manager in your custom model
+    objects = MyUserManager()
+    '''
+
+
+# Custom user model class
+class MyUser(AbstractBaseUser):
+    first_name = models.CharField(verbose_name="first name", max_length=60)
+    last_name = models.CharField(verbose_name="last name", max_length=60)
+    username = models.CharField(verbose_name="username", max_length=30, unique=True, null=True, blank=True)
+    email = models.EmailField(verbose_name="email address", max_length=60, unique=True)
+    date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True)
+    last_login = models.DateTimeField(verbose_name="last login", auto_now=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    @property
+    def name(self):
+        return f'{self.first_name} {self.last_name}'
+
+    # Setting to determing what field to use as login parameter
+    USERNAME_FIELD = "email"
+
+    # Setting to set required fields
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    # Setting a manager for this custom user model
+    objects = MyUserManager()
+
+    # Setting to determine what field to show on our database
+    def __str__(self):
+        return self.name
+
+    # Determines if signup user has permissions
+    def has_perm(self, perm, obj=None):
+        return True
+
+    # Determines if the signed up user will have acccess to other models
+    # In our app or project
+    def has_module_perms(self, app_label):
+        return True
+
+    '''
+    Make sure to set this custom model as our user model in settings.py
+    AUTH_USER_MODEL = "App.CustomUserModel"
+    Make sure to delete previous migration files incase of errors
+    Then make migrations
+    '''
+
 class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
+    user = models.OneToOneField(MyUser, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200, blank=True, null=True)
     email = models.EmailField(max_length=200, blank=True, null=True)
     device = models.CharField(max_length=25, blank=True, null=True)
     
     def __str__(self):
         if self.user:
-            name = f'{self.user.first_name} {self.user.last_name}' or self.user.username
+            name = f'{self.user.first_name} {self.user.last_name}'
         elif self.name:
             name = self.name
         else:
