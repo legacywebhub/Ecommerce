@@ -8,11 +8,16 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import auth
 
+
 # General variables
+
+company = CompanyInfo.objects.last
 categories = Category.objects.all()
 hot_products = Product.objects.filter(hot=True).order_by('?')[:3]
 
+
 # Create your views here.
+
 def index(request):
     p = Paginator(Product.objects.all(), 3)
     page = request.GET.get('page')
@@ -36,6 +41,7 @@ def index(request):
         return redirect('/products/'+search)
 
     context = {
+        'company': company,
         'products': products,
         'item_total': item_total,
         'total': total,
@@ -72,6 +78,7 @@ def products(request, search):
         'products_count':products_count,
         'item_total': item_total,
         'total': total,
+        'company': company,
         'categories' : categories,
         'hot_products':hot_products
     }
@@ -102,6 +109,7 @@ def category(request, category):
         return redirect('/products/'+search)
     
     context = {
+        'company': company,
         'products':products,
         'products_count':products_count,
         'item_total': item_total,
@@ -131,6 +139,7 @@ def cart(request):
         return redirect('/products/'+search)
 
     context = {
+        'company': company,
         'items':items,
         'order':order,
         'item_total': item_total,
@@ -157,6 +166,7 @@ def detail(request, pk):
         search = request.POST['search']
         return redirect('/products/'+search)
     context = {
+        'company': company,
         'product': product,
         'item_total': item_total,
         'total':total,
@@ -197,7 +207,7 @@ def login(request):
                 return redirect('/')
             else:
                 messages.error(request, 'Invalid credentials..   Please try again')
-    context = {}
+    context = {'company': company,}
     return render(request, 'login.html', context)
 
 
@@ -241,7 +251,7 @@ def contact(request):
                 messages.info(request, 'Your message was sent successfully')
                 return redirect('Store:contact')
 
-    context = {'item_total':item_total, 'total':total}
+    context = {'item_total':item_total, 'total':total, 'company': company,}
     return render(request, 'contact.html', context)
 
 def checkout(request):
@@ -258,6 +268,7 @@ def checkout(request):
     total = order.total
 
     context = {
+        'company': company,
         'items':items,
         'order':order, 
         'item_total': item_total, 

@@ -34,25 +34,25 @@
 				  <td>
 					<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="subtract" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
 				  </td>
-                  <td>${{ item.product.price }}</td>
-                  <td>${{ item.product.discount }}</td>
-                  <td>${{ item.product.tax }}</td>
-                  <td>${{ item.price_total }}</td>
+                  <td>{{ item.product.price }}</td>
+                  <td>{{ item.product.discount }}</td>
+                  <td>{{ item.product.tax }}</td>
+                  <td>{{ item.price_total }}</td>
                 </tr>
 				{% endfor %}
 
 				
 				<tr>
                   <td colspan="6" style="text-align:right">Total Discount:	</td>
-                  <td> ${{ order.discount_total }}</td>
+                  <td> {{ order.discount_total }}</td>
                 </tr>
                  <tr>
                   <td colspan="6" style="text-align:right">Total Tax:	</td>
-                  <td> ${{ order.tax_total }}</td>
+                  <td> {{ order.tax_total }}</td>
                 </tr>
 				 <tr>
-                  <td colspan="6" style="text-align:right"><strong>TOTAL (${{order.price_total}} - ${{order.discount_total}} + ${{order.tax_total}}) =</strong></td>
-                  <td class="label label-important" style="display:block"> <strong> ${{ order.total }} </strong></td>
+                  <td colspan="6" style="text-align:right"><strong>TOTAL ({{order.price_total}} - {{order.discount_total}} + {{order.tax_total}}) =</strong></td>
+                  <td class="label label-important" style="display:block"> <strong> {{ order.total }} </strong></td>
                 </tr>
 				</tbody>
             </table>

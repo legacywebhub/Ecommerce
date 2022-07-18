@@ -2,6 +2,38 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
+class CompanyInfo(models.Model):
+    logo = models.ImageField(upload_to="Images/Company", blank=True, null=True)
+    name = models.CharField(max_length=150, blank=False, null=False)
+    address = models.CharField(max_length=150, blank=True, null=True)
+    country = models.CharField(max_length=60, blank=True, null=True)
+    email1 = models.EmailField(blank=False, null=False)
+    email2 = models.EmailField(blank=True, null=True)
+    phone1 = models.CharField(max_length=25, blank=False, null=False)
+    phone2 = models.CharField(max_length=25, blank=True, null=True)
+    website = models.CharField(max_length=100, blank=True, null=True)
+    facebook_link = models.URLField(max_length=2000, blank=True, null=True)
+    twitter_link = models.URLField(max_length=2000, blank=True, null=True)
+    instagram_link = models.URLField(max_length=2000, blank=True, null=True)
+    youtube_link = models.URLField(max_length=200, blank=True, null=True)
+    currency = models.CharField(max_length=60, null=False, blank=False,  help_text="e.g dollar")
+    currency_shortcode = models.CharField(max_length=3, null=False, blank=False, help_text="e.g usd")
+    currency_symbol = models.CharField(max_length=1, null=False, blank=False,  help_text="e.g $")
+    public_key = models.CharField(max_length=160, blank=True, null=True)
+    secret_key = models.CharField(max_length=160, blank=True, null=True)
+    google_analytics = models.TextField(max_length=3000, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.id and CompanyInfo.objects.exists():
+            raise ValueError("This model cannot have two or more records")
+        else:
+            super().save(*args, **kwargs)
+
+
+# Manager class for custom user
 class MyUserManager(BaseUserManager):
     # Determines how to create our user model and validations
     def create_user(self, first_name, last_name, email, password=None):

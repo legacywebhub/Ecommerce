@@ -10,12 +10,13 @@
 	<div class="row">
 		<div class="span4">
 		<h4>Contact Details</h4>
-		<p>	18 Fresno,<br/> CA 93727, USA
+		<p>	{{company.address}}<br>{{company.country}}
 			<br/><br/>
-			info@bootsshop.com<br/>
-			﻿Tel 123-456-6780<br/>
-			Fax 123-456-5679<br/>
-			web:bootsshop.com
+			{{company.email1}}<br/>
+			{% if company.email2 %}{{company.email2}}<br/>{% endif %}
+			﻿Tel {{company.phone1}}<br/>
+			{% if company.phone2 %}﻿Tel2 {{company.phone2}}<br/>{% endif %}
+			{{company.website}}
 		</p>		
 		</div>
 			
@@ -67,12 +68,12 @@
       </form>
 	  </div>
 	</div>
-	<div class="row">
+	<!-- <div class="row">
 	<div class="span12">
 	<iframe style="width:100%; height:300; border: 0px" scrolling="no" src="https://maps.google.co.uk/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=18+California,+Fresno,+CA,+United+States&amp;aq=0&amp;oq=18+California+united+state&amp;sll=39.9589,-120.955336&amp;sspn=0.007114,0.016512&amp;ie=UTF8&amp;hq=&amp;hnear=18,+Fresno,+California+93727,+United+States&amp;t=m&amp;ll=36.732762,-119.695787&amp;spn=0.017197,0.100336&amp;z=14&amp;output=embed"></iframe><br />
 	<small><a href="https://maps.google.co.uk/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=18+California,+Fresno,+CA,+United+States&amp;aq=0&amp;oq=18+California+united+state&amp;sll=39.9589,-120.955336&amp;sspn=0.007114,0.016512&amp;ie=UTF8&amp;hq=&amp;hnear=18,+Fresno,+California+93727,+United+States&amp;t=m&amp;ll=36.732762,-119.695787&amp;spn=0.017197,0.100336&amp;z=14" style="color:#0000FF;text-align:left">View Larger Map</a></small>
 	</div>
-	</div>
+	</div> -->
 </div>
 </div>
 {% endblock %}

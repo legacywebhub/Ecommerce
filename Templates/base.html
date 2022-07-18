@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Bootshop online Shopping cart</title>
+    <title>{{company.name}} shop</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -38,6 +38,12 @@
 	}
 	.info {
 		color: rgba(3, 51, 211, 0.705);
+	}
+	#logo-name {
+		color: #fff;
+		font-size: large;
+		font-weight: bold;
+		font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 	}
 	</style>
 
@@ -102,8 +108,8 @@
 		<span class="">Es</span>
 		<span class="btn btn-mini">En</span>
 		<span>&pound;</span>
-		<span class="btn btn-mini">${{ order.total }}</span>
-		<span class="">$</span>
+		<span class="btn btn-mini">{{company.currency_symbol}}{{ order.total }}</span>
+		<span class="">{{company.currency_symbol}}</span>
 		<a href="{% url 'Store:cart' %}"><span class="btn btn-mini btn-primary"><i class="icon-shopping-cart icon-white"></i> [ {{ item_total }} ] Items in your cart </span> </a> 
 	</div>
 	</div>
@@ -116,7 +122,13 @@
 	<span class="icon-bar"></span>
 </a>
   <div class="navbar-inner">
-    <a class="brand" href="{% url 'Store:index' %}"><img src="{% static 'themes/images/logo.png' %}" alt="Logo"/></a>
+	{% if company.logo %}
+    <a class="brand" href="{% url 'Store:index' %}"><img src="{{company.logo.url}}" alt="Logo"/></a>
+	{% elif company.name %}
+	<a class="brand" href="{% url 'Store:index' %}" id="logo-name">{{company.name}}</a>
+	{% else %}
+	<a class="brand" href="{% url 'Store:index' %}"><img src="{% static 'themes/images/logo.png' %}" alt="Logo"/></a>
+	{% endif %}
 		<form class="form-inline navbar-search" method="POST" action="#">
 		{% csrf_token %}
 		<input id="srchFld" class="srchTxt" name="search" type="text" placeholder="search product" />
@@ -186,9 +198,15 @@
 			 </div>
 			<div id="socialMedia" class="span3 pull-right">
 				<h5>SOCIAL MEDIA </h5>
-				<a href="#"><img width="60" height="60" src="{% static 'themes/images/facebook.png' %}" title="facebook" alt="facebook link"/></a>
-				<a href="#"><img width="60" height="60" src="{% static 'themes/images/twitter.png' %}" title="twitter" alt="twitter link"/></a>
-				<a href="#"><img width="60" height="60" src="{% static 'themes/images/youtube.png' %}" title="youtube" alt="youtube link"/></a>
+				{% if company.facebook_link %}
+				<a href="{{company.facebook_link}}"><img width="60" height="60" src="{% static 'themes/images/facebook.png' %}" title="facebook" alt="facebook link"/></a>
+				{% endif %}
+				{% if company.twitter_link %}
+				<a href="{{company.twitter_link}}"><img width="60" height="60" src="{% static 'themes/images/twitter.png' %}" title="twitter" alt="twitter link"/></a>
+				{% endif %}
+				{% if company.youtube_link %}
+				<a href="company.youtube_link"><img width="60" height="60" src="{% static 'themes/images/youtube.png' %}" title="youtube" alt="youtube link"/></a>
+				{% endif %}
 			 </div> 
 		 </div>
 		<p class="pull-right">&copy; Bootshop</p>
