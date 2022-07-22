@@ -4,9 +4,9 @@ from .models import *
 from django.http import JsonResponse
 import json
 from django.core.paginator import Paginator
-from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import auth
+from .utils import generateUniqueId
 
 
 # General variables
@@ -22,13 +22,19 @@ def index(request):
     p = Paginator(Product.objects.all(), 3)
     page = request.GET.get('page')
     products = p.get_page(page)
+
+    # Generate unique Id to use as cookie
+    cookie_code = generateUniqueId()
     
     try:
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            device = cookie_code
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     items =  order.orderitem_set.all()
@@ -48,7 +54,10 @@ def index(request):
         'categories' : categories,
         'hot_products':hot_products
     }
-    return render(request, 'index.html', context)
+    response = render(request, 'index.html', context)
+    # Setting the generated cookie_code for our response
+    response.set_cookie('device', cookie_code)
+    return response
 
 
 def products(request, search):
@@ -61,8 +70,12 @@ def products(request, search):
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            # Redirect to index page to set a cookie for request user
+            return redirect('/')
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     item_total = order.item_total
@@ -97,8 +110,12 @@ def category(request, category):
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            # Redirect to index page to set a cookie for request user
+            return redirect('/')
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     item_total = order.item_total
@@ -126,8 +143,12 @@ def cart(request):
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            # Redirect to index page to set a cookie for request user
+            return redirect('/')
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     items =  order.orderitem_set.all()
@@ -155,8 +176,12 @@ def detail(request, pk):
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            # Redirect to index page to set a cookie for request user
+            return redirect('/')
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     item_total = order.item_total
@@ -223,8 +248,12 @@ def contact(request):
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            # Redirect to index page to set a cookie for request user
+            return redirect('/')
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     item_total = order.item_total
@@ -259,8 +288,12 @@ def checkout(request):
         # Trying to get customer from authenticated user
         customer = request.user.customer
     except:
-        # Creating a customer using his device ID from browser
-        device = request.COOKIES['device']
+        try:
+            # Try getting a customer using his device ID from browser
+            device = request.COOKIES['device']
+        except:
+            # Redirect to index page to set a cookie for request user
+            return redirect('/')
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     items =  order.orderitem_set.all()
@@ -320,8 +353,6 @@ def updateItem(request):
 
 
 def processOrder(request):
-    # Generation a unique code used as transaction id
-    # transaction_id = datetime.now().timestamp().replace('.', '')
     data = json.loads(request.body)
     print('data:', data)
     first_name = data['shippingFormData']['first-name']
