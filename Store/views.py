@@ -6,6 +6,8 @@ import json
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib.auth.models import auth
+from .forms import MyUserForm, ShippingForm
+from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from .utils import generateUniqueId
 
@@ -216,10 +218,13 @@ def login(request):
                 if MyUser.objects.filter(email=email).exists():
                     messages.error(request, 'Sorry this email has already been taken!')
                 else:
+                    # Saving user and user instances
                     user = MyUser.objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password2)
                     user.save()
                     customer = Customer.objects.create(user=user, name=f'{user.first_name} {user.last_name}', email=user.email)
                     customer.save()
+                    user_shipping_detail = ShippingDetail.objects.create(user=user)
+                    user_shipping_detail.save()
                     messages.success(request, 'Your account has successfully been created... you can now sign in!')
             else:
                 messages.error(request, 'Passwords does not match... Please try again')   
@@ -241,6 +246,44 @@ def login(request):
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
+
+
+@login_required
+def profile(request, user_id):
+    user_instance = MyUser.objects.get(id=user_id)
+    user_shipping = ShippingDetail.objects.get(user=user_instance)
+    # This forms here solves our bug issue after saving either of our forms
+    user_form = MyUserForm(instance=user_instance)
+    shipping_form = ShippingForm(instance=user_shipping)
+    # Since we are sure this user is authenticated, we get the customer connect to this user directly
+    customer = Customer.objects.get(user=user_instance)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    item_total = order.item_total
+    total = order.total
+
+    if request.method == "POST":
+        if 'save-user-detail' in request.POST:
+            user_form = MyUserForm(request.POST or None, instance=user_instance)
+            if user_form.is_valid():
+                user_form.save()
+                messages.success(request, 'profile successfully updated')
+        elif 'save-shipping-detail' in request.POST:
+            shipping_form = ShippingForm(request.POST or None, instance=user_shipping)
+            if shipping_form.is_valid():
+                shipping_form.save()
+                messages.success(request, 'shipping details successfully updated')
+    else:
+        user_form = MyUserForm(instance=user_instance)
+        shipping_form = ShippingForm(instance=user_shipping)
+    context = {
+        'company': company,
+        'user_form': user_form, 
+        'shipping_form': shipping_form,
+        'item_total': item_total,
+        'total': total
+        }
+    return render(request, 'profile.html', context)
 
 
 
@@ -399,7 +442,7 @@ def processOrder(request):
 
     # Saving shipping detail of customer
     if order.shipping == True:
-        shipping_details = ShippingAddress.objects.create(
+        shipping_details = Shipping.objects.create(
             customer=customer,
             order=order,
             address=data['shippingFormData']['address'],

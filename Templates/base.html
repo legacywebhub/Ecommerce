@@ -78,7 +78,7 @@
 <div class="container">
 <div id="welcomeLine" class="row">
     {% if user.is_authenticated %}
-	<div class="span6">Welcome! <strong>{{ user.first_name }}</strong></div>
+	<div class="span6">Welcome! <strong><a href="{% url 'Store:profile' request.user.id %}">{{ user.first_name }}<a/></strong></div>
     {% else %}
     <div class="span6">Welcome! <strong>user</strong></div>
     {% endif %}
@@ -115,8 +115,10 @@
 		  <button type="submit" id="submitButton" class="btn btn-primary">Go</button>
     	</form>
     <ul id="topMenu" class="nav pull-right">
+	{% if user.is_authenticated %}
+	 <li class=""><a href="{% url 'Store:profile' request.user.id %}">Profile</a></li>
 	 <li class=""><a href="special_offer.html">Specials Offer</a></li>
-	 <li class=""><a href="normal.html">Delivery</a></li>
+	 {% endif %}
 	 <li class=""><a href="{% url 'Store:contact' %}">Contact</a></li>
 	 <li class="">
 	 {% if user.is_authenticated %}

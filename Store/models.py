@@ -130,6 +130,21 @@ class MyUser(AbstractBaseUser):
     Then make migrations
     '''
 
+class ShippingDetail(models.Model):
+    user = models.OneToOneField(MyUser, on_delete=models.CASCADE, blank=False, null=False)
+    address = models.CharField(max_length=200, null=True, blank=True)
+    apartment = models.CharField(max_length=200, null=True, blank=True, help_text='block or room number')
+    city = models.CharField(max_length=200, null=True, blank=True)
+    state = models.CharField(max_length=200, null=True, blank=True)
+    country = models.CharField(max_length=200, null=True, blank=True)
+    zipcode = models.CharField(max_length=200, null=True, blank=True)
+    phone1 = models.CharField(max_length=25, null=True, blank=True)
+    phone2 = models.CharField(max_length=25, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.name
+
+    
 class Customer(models.Model):
     user = models.OneToOneField(MyUser, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200, blank=True, null=True)
@@ -295,17 +310,17 @@ class OrderItem(models.Model):
         return total
     
     
-class ShippingAddress(models.Model):
+class Shipping(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
     address = models.CharField(max_length=200, null=False, blank=False)
-    apartment = models.CharField(max_length=200, null=False, blank=False, default='apartment')
+    apartment = models.CharField(max_length=200, null=False, blank=False, help_text='block or room number')
     city = models.CharField(max_length=200, null=False, blank=False)
     state = models.CharField(max_length=200, null=False, blank=False)
     country = models.CharField(max_length=200, null=False, blank=False)
     zipcode = models.CharField(max_length=200, null=False, blank=False)
-    phone1 = models.IntegerField(null=False, blank=False)
-    phone2 = models.IntegerField(null=True, blank=True)
+    phone1 = models.CharField(max_length=25, null=False, blank=False)
+    phone2 = models.CharField(max_length=25, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
