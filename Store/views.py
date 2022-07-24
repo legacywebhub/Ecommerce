@@ -6,12 +6,13 @@ import json
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib.auth.models import auth
+from django.core.mail import send_mail
 from .utils import generateUniqueId
 
 
 # General variables
 
-company = CompanyInfo.objects.last
+company = CompanyInfo.objects.last()
 categories = Category.objects.all()
 hot_products = Product.objects.filter(hot=True).order_by('?')[:3]
 
@@ -275,6 +276,14 @@ def contact(request):
             except ValueError:
                 messages.info(request, 'Your email is not valid')
             else:
+                try:
+                    # Trying to notify company or admins via mail
+                    send_mail(
+                    f'{subject}({location})', message, email, [company.email1, company.email2], fail_silently=False
+                    )
+                    print(f'Message was successfully sent to admins...')
+                except:
+                    pass
                 message = Message.objects.create(name=name, location=location, email=email, subject=subject, message=message)
                 message.save()
                 messages.info(request, 'Your message was sent successfully')

@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+# Imports for newletter
+from django.core.mail import send_mail, EmailMessage
+from django_pandas.io import read_frame
+
 
 # Create your models here.
 class CompanyInfo(models.Model):
@@ -317,3 +321,52 @@ class Message(models.Model):
     
     def __str__(self):
         return f'{self.date_sent}'
+
+
+class Newsletter(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    subject = models.CharField(max_length=160, blank=False, null=False)
+    file = models.FileField(upload_to='Images/Newsletter', null=True, blank=True)
+    body = models.TextField(max_length=5000, null=True, blank=True)
+    sent_mail = models.BooleanField(default=False)
+
+    def __str__(self):
+        return(f'{str(self.date_created)}   {self.subject}')
+
+    # Save method to send mails before saving
+    # sent_mail will be False if there was an error before saving
+    # sent_mail will be True if mail was sent successfully
+    # remove try blocks to see errors in real time
+    def save(self, *args, **kwargs):
+        company = CompanyInfo.objects.last()
+        users = MyUser.objects.all()
+
+        #converts an email query to a list object
+        #using the read_frame function from django-pandas external module
+        df = read_frame(users, fieldnames=['email'])
+        mail_list = df['email'].values.tolist()
+    
+        if bool(self.file) == True:
+            try:
+                # Checking if there is a file
+                email = EmailMessage(self.subject, self.body, company.email1, mail_list)
+                email.content_subtype = 'html'
+                email.attach(self.file.name, self.file.read())
+                email.send()
+                self.sent = True
+                print('Newsletter with file(s) was successfully sent to users...')
+            except:
+                print('Sorry... an error occured while trying to send newsletter with file(s)')
+        else:
+            try:
+                # If there's no file
+                send_mail(
+                self.subject, self.body, company.email1, mail_list, fail_silently=False
+                )
+                self.sent = True
+                print(f'Newsletter was successfully sent to users...')
+            except:
+                print('Sorry... an error occured while trying to send newsletter')
+        # We don't intend to save newsletter images so we set file to None
+        self.file = None
+        super().save(*args, **kwargs)
