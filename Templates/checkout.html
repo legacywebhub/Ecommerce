@@ -40,106 +40,133 @@
 </div>
 
 
-		<div id="shipping-container" class="span9">
-		<table class="table table-bordered">
-		<tr><th>ESTIMATE YOUR SHIPPING </th></tr>
-		<tr> 
-		<td>
-		<h4>Your address</h4>
-		<form class="form-horizontal" id="shipping-form">
-		{% if user.is_authenticated %}
-		<input type="hidden" value="{{user.first_name}}" name="first-name" id="first-name" placeholder="first Name"/>
-		<input type="hidden" value="{{user.last_name}}" name="last-name" id="last-name" placeholder="last Name"/>
-		<input type="hidden" value="{{user.email}}" name="email" id="email" placeholder="email"/>
-		{% else %}
-		<div class="control-group">
-			<label class="control-label" for="first-name">First Name<sup>*</sup></label>
-			<div class="controls">
-			  <input type="text" name="first-name" id="first-name" placeholder="first Name" required/>
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="last-name">Last Name<sup>*</sup></label>
-			<div class="controls">
-			  <input type="text" name="last-name" id="last-name" placeholder="last Name" required/>
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="email">Email<sup>*</sup></label>
-			<div class="controls">
-			  <input type="email" name="email" id="email" placeholder="email" required/> <span>{% if customer.shippingaddress.email %}{{customer.shippingaddress.email}}{% else %}example@email.com{% endif %}</span>
-			</div>
-		</div>
-		{% endif %}
-
-		<div class="control-group">
-			<label class="control-label" for="address">Address<sup>*</sup></label>
-			<div class="controls">
-			  <input type="text" name="address" id="address" placeholder="address" required/> <span>{% if customer.shippingaddress.address %}{{customer.shippingaddress.address}}{% else %}Street address, P.O. box, company name, c/o{% endif %}</span>
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="apartment">Apartment<sup>*</sup></label>
-			<div class="controls">
-			  <input type="text" name="apartment" id="apartment" placeholder="apartment" required/> <span>{% if customer.shippingaddress.apartment %}{{customer.shippingaddress.address}}{% else %}Apartment, suite, unit, building, floor, etc.{% endif %}</span>
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="city">City<sup>*</sup></label>
-			<div class="controls">
-			  <input type="text" name="city" id="city" placeholder="city" required/> 
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="state">State<sup>*</sup></label>
-			<div class="controls">
-               <input type="text" name="state" id="state" placeholder="state" required/>
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="country">Country<sup>*</sup></label>
-			<div class="controls">
-               <input type="text" name="country" id="country" placeholder="country" required/>
-			</div>
-		</div>		
-		<div class="control-group">
-			<label class="control-label" for="zipcode">Zip/Postal Code<sup>*</sup></label>
-			<div class="controls">
-			  <input type="text" name="zipcode" id="zipcode" placeholder="zip/postal code" required/> 
-			</div>
-		</div>
-		<div class="control-group">
-			<label class="control-label" for="phone1">Home phone <sup>*</sup></label>
-			<div class="controls">
-			  <input type="text"  name="phone1" id="phone1" placeholder="home phone" required/> <span>You must register at least one phone number</span>
-			</div>
-		</div>		
-		<div class="control-group">
-			<label class="control-label" for="phone2">Mobile Phone </label>
-			<div class="controls">
-			  <input type="text"  name="phone2" id="phone2" placeholder="mobile phone"/> 
-			</div>
-		</div>
-
-	    <span style="margin-left: 45px; font-weight:bold; font-size:18px"><sup>*</sup>Required field</span>
-	
-	    <div class="control-group">
-			<div class="controls">
-			<input class="btn btn-large btn-success" id="shipping-form-submit-button" type="submit" value="Proceed to make payment" />
-		   </div>
-	    </div>
-	</form>				  
-	</td>
-	</tr>
-	</table>
+<div id="shipping-container" class="span9">
+<table class="table table-bordered">
+<tr><th>ESTIMATE YOUR SHIPPING </th></tr>
+<tr> 
+<td>
+<h4>Your address</h4>
+<form class="form-horizontal" id="shipping-form" method="POST">
+{% if user.is_authenticated %}
+<div>
+	<div class="well">
+		<p>First Name: {{user.first_name}}</p>
+		<p>Last Name: {{user.last_name}}</p>
+		<p>Email: {{user.email}}</p>
+		<p>Address: {{user.shippingdetail.address}}</p>
+		<p>Apartment: {{user.shippingdetail.apartment}}</p>
+		<p>State: {{user.shippingdetail.state}}</p>
+		<p>Country: {{user.shippingdetail.country}}</p>
+		<p>Zip/Postal code: {{user.shippingdetail.zipcode}}</p>
+		<p>Home phone: {{user.shippingdetail.phone1}}</p>
+		<p>Mobile phone: {{user.shippingdetail.phone2}}</p>
+		</br></br></br>
+		<i><h6>Change your details <a style="color: blue;" href="{% url 'Store:profile' request.user.id %}">here</a></h6></i>
 	</div>
-	<br><br>
-
-	<div id="payment-container" class="span9">
-		<p style="font-size:20px">Make Payment</p><hr>
-		 <button id="paypal" class="btn btn-large">PayPal</button></p>
-		 <button id="paystack" class="btn btn-large">Paystack</button></p>
+</div>
+<input type="hidden" value="{{user.first_name}}" name="first-name" id="first-name" placeholder="first Name"/>
+<input type="hidden" value="{{user.last_name}}" name="last-name" id="last-name" placeholder="last Name"/>
+<input type="hidden" value="{{user.email}}" name="email" id="email" placeholder="email"/>
+<input type="hidden" value="{{user.shippingdetail.address}}" name="address" id="address" placeholder="address"/>
+<input type="hidden" value="{{user.shippingdetail.apartment}}" name="apartment" id="apartment" placeholder="apartment"/>
+<input type="hidden" value="{{user.shippingdetail.city}}" name="city" id="city" placeholder="city"/>
+<input type="hidden" value="{{user.shippingdetail.state}}" name="state" id="state" placeholder="state"/>
+<input type="hidden" name="{{user.shippingdetail.country}}" id="country" placeholder="country"/>
+<input type="hidden" name="{{user.shippingdetail.zipcode}}" id="zipcode" placeholder="zip/postal code"/> 
+<input type="hidden"  name="{{user.shippingdetail.phone1}}" id="phone1" placeholder="home phone"/>
+<input type="hidden"  name="{{user.shippingdetail.phone2}}" id="phone2" placeholder="mobile phone"/>
+{% else %}
+<div class="control-group">
+	<label class="control-label" for="first-name">First Name<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="first-name" id="first-name" placeholder="first Name" required/>
 	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="last-name">Last Name<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="last-name" id="last-name" placeholder="last Name" required/>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="email">Email<sup>*</sup></label>
+	<div class="controls">
+		<input type="email" name="email" id="email" placeholder="email" required/> <span>{% if customer.shippingaddress.email %}{{customer.shippingaddress.email}}{% else %}example@email.com{% endif %}</span>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="address">Address<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="address" id="address" placeholder="address" required/> <span>{% if customer.shippingaddress.address %}{{customer.shippingaddress.address}}{% else %}Street address, P.O. box, company name, c/o{% endif %}</span>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="apartment">Apartment<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="apartment" id="apartment" placeholder="apartment" required/> <span>{% if customer.shippingaddress.apartment %}{{customer.shippingaddress.address}}{% else %}Apartment, suite, unit, building, floor, etc.{% endif %}</span>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="city">City<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="city" id="city" placeholder="city" required/> 
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="state">State<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="state" id="state" placeholder="state" required/>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="country">Country<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="country" id="country" placeholder="country" required/>
+	</div>
+</div>		
+<div class="control-group">
+	<label class="control-label" for="zipcode">Zip/Postal Code<sup>*</sup></label>
+	<div class="controls">
+		<input type="text" name="zipcode" id="zipcode" placeholder="zip/postal code" required/> 
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="phone1">Home phone <sup>*</sup></label>
+	<div class="controls">
+		<input type="text"  name="phone1" id="phone1" placeholder="home phone" required/> <span>You must register at least one phone number</span>
+	</div>
+</div>		
+<div class="control-group">
+	<label class="control-label" for="phone2">Mobile Phone </label>
+	<div class="controls">
+		<input type="text"  name="phone2" id="phone2" placeholder="mobile phone"/> 
+	</div>
+</div>
+
+<p style="margin-left: 45px; font-weight:bold; font-size:15px"><sup>*</sup>Required field</p>
+<p style="margin-left: 45px; font-size:12px">Filling your shipping address can be much of a task or hassle. <a style="color: blue;" href="{% url 'Store:login' %}">Sign up</a> with us to save your shipping details and edit anytime ;)</p><br><br>
+{% endif %}
+
+<div class="control-group">
+	<div class="controls">
+	<input class="btn btn-large btn-success" id="shipping-form-submit-button" type="submit" value="Proceed to make payment" />
+	</div>
+</div>
+</form>				  
+</td>
+</tr>
+</table>
+
+<div id="payment-container">
+	<p style="font-size:18px">Make Payment</p><hr>
+	<button id="paypal" class="btn btn-large">PayPal</button></p>
+	<button id="paystack" class="btn btn-large">Paystack</button></p>
+</div>
+
+</div>
+<br><br>
+
+
 	
 {% endblock %}
 
@@ -177,6 +204,7 @@
 		shippingContainer.innerHTML = '';
 	}
 
+	//this is for authenticated users having only digital products to pay for
 	if (shipping == 'False' && user != 'AnonymousUser'){
 		//hide entire form container if user is logged in and shipping is false
 		shippingContainer.classList.add("hidden");
@@ -206,25 +234,12 @@
 //Functions
 function payWithPaystack() {
   const paystack = new PaystackPop();
-  let first_name = document.getElementById('first-name').value,
-  last_name = document.getElementById('last-name').value,
-  email = shippingForm.email.value,
-  address = shippingForm.address.value,
-  apartment = shippingForm.apartment.value,
-  city = shippingForm.city.value,
-  state = shippingForm.state.value,
-  country = shippingForm.country.value,
-  zipcode = shippingForm.zipcode.value,
-  phone1 = shippingForm.phone1.value,
-  phone2 = shippingForm.phone2.value;
-
-  console.log(first_name, last_name)
 
   paystack.newTransaction({
 
     key: '{{public_key}}', // Replace with your public key
 
-    email: email,
+    email: document.getElementById('email').value,
 
     amount: total * 100, // the amount value is multiplied by 100 to convert to the lowest currency unit
 
@@ -253,15 +268,15 @@ function payWithPaystack() {
 			shippingFormData = {
 				'first-name': document.getElementById('first-name').value,
 				'last-name': document.getElementById('last-name').value,
-				'address': shippingForm.address.value,
-				'apartment': shippingForm.apartment.value,
-				'city': shippingForm.city.value,
-				'state': shippingForm.state.value,
-				'country': shippingForm.country.value,
-				'zipcode': shippingForm.zipcode.value,
-				'phone1': shippingForm.phone1.value,
-				'phone2': shippingForm.phone2.value,
-				'email': shippingForm.email.value,
+				'address': document.getElementById('address').value,
+				'apartment': document.getElementById('apartment').value,
+				'city': document.getElementById('city').value,
+				'state': document.getElementById('state').value,
+				'country': document.getElementById('country').value,
+				'zipcode': document.getElementById('zipcode').value,
+				'phone1': document.getElementById('phone1').value,
+				'phone2': document.getElementById('phone2').value,
+				'email': document.getElementById('email').value,
 				'total': total,
 				'transaction-id':ref
 			}
