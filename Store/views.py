@@ -17,6 +17,8 @@ from .utils import generateUniqueId
 company = CompanyInfo.objects.last()
 categories = Category.objects.all()
 hot_products = Product.objects.filter(hot=True).order_by('?')[:3]
+# Generate unique Id to use as cookie
+cookie_code = generateUniqueId()
 
 
 # Create your views here.
@@ -25,9 +27,6 @@ def index(request):
     p = Paginator(Product.objects.all(), 3)
     page = request.GET.get('page')
     products = p.get_page(page)
-
-    # Generate unique Id to use as cookie
-    cookie_code = generateUniqueId()
     
     try:
         # Trying to get customer from authenticated user
@@ -57,9 +56,17 @@ def index(request):
         'categories' : categories,
         'hot_products':hot_products
     }
+
+    # Setting up our response object
     response = render(request, 'index.html', context)
-    # Setting the generated cookie_code for our response
-    response.set_cookie('device', cookie_code)
+    # Using a try block to ensure there's no existing device cookie
+    # before setting one
+    try:
+        # Checking if he already has a cookie named 'device'
+        device = request.COOKIES['device']
+    except:
+        # If not set one using our generated cookie_code
+        response.set_cookie('device', cookie_code)
     return response
 
 
