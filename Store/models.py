@@ -1,8 +1,10 @@
+from unicodedata import decimal
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # Imports for newletter
 from django.core.mail import send_mail, EmailMessage
 from django_pandas.io import read_frame
+from decimal import Decimal
 
 
 # Create your models here.
@@ -195,12 +197,30 @@ class Product(models.Model):
     description = models.TextField(max_length=3000, null=True, blank=False)
     date_released = models.DateField(blank=True, null=True)
     price = models.FloatField()
-    discount = models.FloatField(default=0)
-    tax = models.FloatField(default=0)
-    shipping_fee = models.FloatField(default=0)
-    hot = models.BooleanField(default=True, null=False, blank=False)
-    new = models.BooleanField(default=True, null=False, blank=False) 
+    discount_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
+    tax_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
+    shipping_fee = models.FloatField()
+    hot = models.BooleanField(default=True, null=False, blank=False)  # hot here means demand
     available = models.BooleanField(default=True, null=False, blank=False)
+
+    # Function to calculate our discount in amount based on input discount percentage
+    @property
+    def discount(self):
+        discount = (self.discount_in_percentage/100) * self.price
+        return discount
+
+    # Function to calculate discount price
+    @property
+    def discount_price(self):
+        discount_price = self.price - self.discount
+        return discount_price
+
+    # Function to calculate tax amount based on input tax percentage
+    @property
+    def tax(self):
+        tax_amount = (self.tax_in_percentage/100) * self.price
+        return tax_amount
+
     
     # __str__ function determines what field to represent on the admin dashboard
     def __str__(self):
