@@ -314,6 +314,7 @@ def profile(request, user_id):
 
 
 def contact(request):
+    # Getting our customer and his order
     order_data = getCustomerAndOrder(request)
 
     if request.method == 'POST':
@@ -358,6 +359,7 @@ def contact(request):
 
 
 def checkout(request):
+    # Getting our customer and his order
     order_data = getCustomerAndOrder(request)
         
     if request.method == 'POST':
@@ -376,6 +378,69 @@ def checkout(request):
         'hot_products':hot_products
     }
     return render(request, 'checkout.html', context)
+
+
+
+
+
+def faq(request):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
+    context = {
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products
+    }
+    return render(request, 'faq.html', context)
+
+
+
+
+
+def legal(request):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
+    context = {
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products
+    }
+    return render(request, 'legal_notice.html', context)
+
+
+
+
+
+def tac(request):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
+    context = {
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products
+    }
+    return render(request, 'tac.html', context)
 
 
 
