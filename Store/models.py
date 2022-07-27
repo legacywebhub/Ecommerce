@@ -150,7 +150,7 @@ class ShippingDetail(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(MyUser, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200, blank=True, null=True)
-    email = models.EmailField(max_length=200, blank=True, null=True)
+    email = models.EmailField(max_length=200, unique=True, blank=True, null=True)
     device = models.CharField(max_length=25, blank=True, null=True)
     
     def __str__(self):

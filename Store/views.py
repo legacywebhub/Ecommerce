@@ -9,7 +9,13 @@ from django.contrib.auth.models import auth
 from .forms import MyUserForm, ShippingForm
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from .utils import generateUniqueId
+from .utils import *
+
+
+'''
+* Each view is seperated by 5 lines
+* We have two sections: General variables section and views section
+'''
 
 
 # General variables
@@ -19,6 +25,7 @@ categories = Category.objects.all()
 hot_products = Product.objects.filter(hot=True).order_by('?')[:3]
 # Generate unique Id to use as cookie
 cookie_code = generateUniqueId()
+
 
 
 # Create your views here.
@@ -39,10 +46,8 @@ def index(request):
             device = cookie_code
         customer, created = Customer.objects.get_or_create(device=device)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    items =  order.orderitem_set.all()
     item_total = order.item_total
     total = order.total
-
 
     if request.method == 'POST':
         search = request.POST['search']
@@ -70,26 +75,18 @@ def index(request):
     return response
 
 
+
+
+
 def products(request, search):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+
     products_list = Product.objects.filter(name__contains=search)
     products_count = products_list.count
     p = Paginator(products_list, 3)
     page = request.GET.get('page')
     products = p.get_page(page)
-    try:
-        # Trying to get customer from authenticated user
-        customer = request.user.customer
-    except:
-        try:
-            # Try getting a customer using his device ID from browser
-            device = request.COOKIES['device']
-        except:
-            # Redirect to index page to set a cookie for request user
-            return redirect('/')
-        customer, created = Customer.objects.get_or_create(device=device)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    item_total = order.item_total
-    total = order.total
     
     if request.method == 'POST':
         search = request.POST['search']
@@ -99,8 +96,8 @@ def products(request, search):
         'search':search,
         'products':products,
         'products_count':products_count,
-        'item_total': item_total,
-        'total': total,
+        'item_total': order_data['item_total'],
+        'total': order_data['total'],
         'company': company,
         'categories' : categories,
         'hot_products':hot_products
@@ -109,27 +106,18 @@ def products(request, search):
 
 
 
+
+
 def category(request, category):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+
     products_list = Product.objects.filter(category=category)
     category = ProductCategory.objects.get(id=category)
     products_count = products_list.count
     p = Paginator(products_list, 3)
     page = request.GET.get('page')
     products = p.get_page(page)
-    try:
-        # Trying to get customer from authenticated user
-        customer = request.user.customer
-    except:
-        try:
-            # Try getting a customer using his device ID from browser
-            device = request.COOKIES['device']
-        except:
-            # Redirect to index page to set a cookie for request user
-            return redirect('/')
-        customer, created = Customer.objects.get_or_create(device=device)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    item_total = order.item_total
-    total = order.total
     
     if request.method == 'POST':
         search = request.POST['search']
@@ -139,8 +127,8 @@ def category(request, category):
         'company': company,
         'products':products,
         'products_count':products_count,
-        'item_total': item_total,
-        'total': total,
+        'item_total': order_data['item_total'],
+        'total': order_data['total'],
         'category': category,
         'categories' : categories,
         'hot_products':hot_products
@@ -148,22 +136,12 @@ def category(request, category):
     return render(request, 'product-category.html', context)
 
 
+
+
+
 def cart(request):
-    try:
-        # Trying to get customer from authenticated user
-        customer = request.user.customer
-    except:
-        try:
-            # Try getting a customer using his device ID from browser
-            device = request.COOKIES['device']
-        except:
-            # Redirect to index page to set a cookie for request user
-            return redirect('/')
-        customer, created = Customer.objects.get_or_create(device=device)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    items =  order.orderitem_set.all()
-    item_total = order.item_total
-    total = order.total
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
         
     if request.method == 'POST':
         search = request.POST['search']
@@ -171,40 +149,33 @@ def cart(request):
 
     context = {
         'company': company,
-        'items':items,
-        'order':order,
-        'item_total': item_total,
-        'total': total,
+        'items': order_data['items'],
+        'order': order_data['order'],
+        'item_total': order_data['item_total'],
+        'total': order_data['total'],
         'categories' : categories,
         'hot_products':hot_products
     }
     return render(request, 'cart.html', context)
 
+
+
+
+
 def detail(request, pk):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
     product = Product.objects.get(id=pk)
-    try:
-        # Trying to get customer from authenticated user
-        customer = request.user.customer
-    except:
-        try:
-            # Try getting a customer using his device ID from browser
-            device = request.COOKIES['device']
-        except:
-            # Redirect to index page to set a cookie for request user
-            return redirect('/')
-        customer, created = Customer.objects.get_or_create(device=device)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    item_total = order.item_total
-    total = order.total
     
     if request.method == 'POST':
         search = request.POST['search']
         return redirect('/products/'+search)
+
     context = {
         'company': company,
         'product': product,
-        'item_total': item_total,
-        'total':total,
+        'item_total': order_data['item_total'],
+        'total': order_data['total'],
         'categories' : categories,
         'hot_products':hot_products
     }
@@ -212,7 +183,12 @@ def detail(request, pk):
 
 
 
+
+
 def login(request):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+
     if request.method == "POST":
         if 'register-submit' in request.POST:
             first_name = request.POST['first-name']
@@ -228,8 +204,35 @@ def login(request):
                     # Saving user and user instances
                     user = MyUser.objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password2)
                     user.save()
-                    customer = Customer.objects.create(user=user, name=f'{user.first_name} {user.last_name}', email=user.email)
-                    customer.save()
+                    
+                    '''
+                    Checking if the user already has a customer model before signing up
+                    so we can link them rather than creating a new customer model instance
+                    and can inherit the previous order before signing up
+                    '''
+
+                    try:
+                        # Checking if there is a customer with device same as our cookie
+                        device = request.COOKIES['device']
+
+                        if Customer.objects.filter(device=device).exists():
+                            customer = Customer.objects.get(device=device)
+                            customer.user = user
+                            customer.name = f'{user.first_name} {user.last_name}'
+                            customer.email = user.email
+                            customer.save()
+                    except:
+                        # Checking if there is a customer with email same as sign up email 
+                            
+                        if Customer.objects.filter(email=email).exists():
+                            customer = Customer.objects.get(email=email)
+                            customer.user = user
+                            customer.save()
+                        else:
+                            # Create new customer if there's non
+                            new_customer = Customer.objects.create(user=user, name=f'{user.first_name} {user.last_name}', email=user.email)
+                            new_customer.save()
+
                     user_shipping_detail = ShippingDetail.objects.create(user=user)
                     user_shipping_detail.save()
                     messages.success(request, 'Your account has successfully been created... you can now sign in!')
@@ -245,14 +248,22 @@ def login(request):
                 return redirect('/')
             else:
                 messages.error(request, 'Invalid credentials..   Please try again')
-    context = {'company': company,}
+        elif 'search' in request.POST:
+            search = request.POST['search']
+            return redirect('/products/'+search)
+    context = {'company': company, 'item_total': order_data['item_total'], 'total': order_data['total'], 'categories' : categories,
+    'hot_products':hot_products }
     return render(request, 'login.html', context)
+
+
 
 
 
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
+
 
 
 
@@ -263,7 +274,7 @@ def profile(request, user_id):
     # This forms here solves our bug issue after saving either of our forms
     user_form = MyUserForm(instance=user_instance)
     shipping_form = ShippingForm(instance=user_shipping)
-    # Since we are sure this user is authenticated, we get the customer connect to this user directly
+    # Since we are sure this user is authenticated, we get the customer connected to this user directly
     customer = Customer.objects.get(user=user_instance)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     item_total = order.item_total
@@ -280,41 +291,33 @@ def profile(request, user_id):
             if shipping_form.is_valid():
                 shipping_form.save()
                 messages.success(request, 'shipping details successfully updated')
+        elif 'search' in request.POST:
+            search = request.POST['search']
+            return redirect('/products/'+search)
     else:
         user_form = MyUserForm(instance=user_instance)
         shipping_form = ShippingForm(instance=user_shipping)
+
     context = {
         'company': company,
         'user_form': user_form, 
         'shipping_form': shipping_form,
         'item_total': item_total,
-        'total': total
+        'total': total,
+        'categories': categories,
+        'hot_products': hot_products
         }
     return render(request, 'profile.html', context)
 
 
 
+
+
 def contact(request):
-    try:
-        # Trying to get customer from authenticated user
-        customer = request.user.customer
-    except:
-        try:
-            # Try getting a customer using his device ID from browser
-            device = request.COOKIES['device']
-        except:
-            # Redirect to index page to set a cookie for request user
-            return redirect('/')
-        customer, created = Customer.objects.get_or_create(device=device)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    item_total = order.item_total
-    total = order.total
+    order_data = getCustomerAndOrder(request)
 
     if request.method == 'POST':
-        if 'search' in request.POST:
-            search = request.POST['search']
-            return redirect('/products/'+search)
-        elif 'message' in request.POST:
+        if 'message' in request.POST:
             name = request.POST['name']
             location = request.POST['location']
             email = request.POST['email']
@@ -336,41 +339,49 @@ def contact(request):
                     pass
                 message = Message.objects.create(name=name, location=location, email=email, subject=subject, message=message)
                 message.save()
-                messages.info(request, 'Your message was sent successfully')
-                return redirect('Store:contact')
-
-    context = {'item_total':item_total, 'total':total, 'company': company,}
-    return render(request, 'contact.html', context)
-
-def checkout(request):
-    try:
-        # Trying to get customer from authenticated user
-        customer = request.user.customer
-    except:
-        try:
-            # Try getting a customer using his device ID from browser
-            device = request.COOKIES['device']
-        except:
-            # Redirect to index page to set a cookie for request user
-            return redirect('/')
-        customer, created = Customer.objects.get_or_create(device=device)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    items =  order.orderitem_set.all()
-    item_total = order.item_total
-    total = order.total
+                messages.success(request, 'Your message was sent successfully')
+        elif 'search' in request.POST:
+            search = request.POST['search']
+            return redirect('/products/'+search)
 
     context = {
+        'item_total': order_data['item_total'], 
+        'total': order_data['total'], 
         'company': company,
-        'items':items,
-        'order':order, 
-        'item_total': item_total, 
-        'total':total, 
-        'customer':customer, 
+        'categories': categories,
+        'hot_products': hot_products
+    }
+    return render(request, 'contact.html', context)
+
+
+
+
+
+def checkout(request):
+    order_data = getCustomerAndOrder(request)
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
+    context = {
+        'items': order_data['items'],
+        'order': order_data['order'],
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'customer': order_data['customer'], 
+        'company': company,
         'public_key': settings.PUBLIC_KEY,
         'categories' : categories,
         'hot_products':hot_products
     }
     return render(request, 'checkout.html', context)
+
+
+
+
+
+# Pseudo Views
 
 def updateItem(request):
     data = json.loads(request.body)
@@ -409,6 +420,9 @@ def updateItem(request):
     if orderItem.quantity <= 0:
         orderItem.delete()
     return JsonResponse('Item was manipulated', safe=False)
+
+
+
 
 
 def processOrder(request):
