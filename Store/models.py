@@ -4,10 +4,11 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # Imports for newletter
 from django.core.mail import send_mail, EmailMessage
 from django_pandas.io import read_frame
-from decimal import Decimal
 
 
 # Create your models here.
+
+# This model holds general values, ads, address, links and other info of our site or app 
 class CompanyInfo(models.Model):
     logo = models.ImageField(upload_to="Images/Company", blank=True, null=True)
     name = models.CharField(max_length=150, blank=False, null=False)
@@ -37,6 +38,9 @@ class CompanyInfo(models.Model):
             raise ValueError("This model cannot have two or more records")
         else:
             super().save(*args, **kwargs)
+
+
+
 
 
 # Manager class for custom user
@@ -87,6 +91,9 @@ class MyUserManager(BaseUserManager):
     '''
 
 
+
+
+
 # Custom user model class
 class MyUser(AbstractBaseUser):
     first_name = models.CharField(verbose_name="first name", max_length=60)
@@ -132,6 +139,11 @@ class MyUser(AbstractBaseUser):
     Then make migrations
     '''
 
+
+
+
+
+# This model holds shipping details of signed up users
 class ShippingDetail(models.Model):
     user = models.OneToOneField(MyUser, on_delete=models.CASCADE, blank=False, null=False)
     address = models.CharField(max_length=200, null=True, blank=True)
@@ -146,7 +158,11 @@ class ShippingDetail(models.Model):
     def __str__(self):
         return self.user.name
 
-    
+
+
+
+
+# This model holds our customers
 class Customer(models.Model):
     user = models.OneToOneField(MyUser, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=200, blank=True, null=True)
@@ -163,6 +179,10 @@ class Customer(models.Model):
         return str(name)
 
 
+
+
+
+# Products main category model
 class Category(models.Model):
     category = models.CharField(max_length=60, unique=True, blank=True, null=False)
 
@@ -170,6 +190,10 @@ class Category(models.Model):
         return self.category
 
 
+
+
+
+# Products sub-category model
 class ProductCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
     product_category = models.CharField(max_length=60, unique=True, blank=False, null=False)
@@ -178,6 +202,10 @@ class ProductCategory(models.Model):
         return self.product_category
 
     
+
+
+
+# Product model
 class Product(models.Model):
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=200, null=False, blank=False)
@@ -220,14 +248,12 @@ class Product(models.Model):
     def tax(self):
         tax_amount = (self.tax_in_percentage/100) * self.price
         return tax_amount
-
     
     # __str__ function determines what field to represent on the admin dashboard
     def __str__(self):
         return self.name
-    
 
-    # Function to fix application crash if we don't have an image
+    # Functions to fix application crash if we don't have an image
     # This can also be fixed on our frontend by using if statement to check
     # if we have an image and then render something else if we dont have
     @property
@@ -246,7 +272,17 @@ class Product(models.Model):
             url = ''
         return url
     
+    # Function to get exact category of product rather than ID of product category
+    @property
+    def product_category(self):
+        category = ProductCategory.objects.get(id=self.category)
+        return category.product_category
     
+
+
+
+
+# Order model
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
@@ -313,7 +349,20 @@ class Order(models.Model):
                 shipping = True
         return shipping
     
+    # Function to get our customer name to use in our admin dashboard
+    @property
+    def customer_name(self):
+        if self.customer.name:
+            name = self.customer.name
+        elif self.customer.device:
+            name = self.customer.device
+        return str(name)
     
+
+
+
+
+# This model saves order products or items
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
@@ -329,10 +378,14 @@ class OrderItem(models.Model):
         total = self.product.price * self.quantity
         return total
     
-    
+
+
+
+
+# This model holds shipping address details for our customers that checked out
 class Shipping(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, null=True, blank=True)
     address = models.CharField(max_length=200, null=False, blank=False)
     apartment = models.CharField(max_length=200, null=False, blank=False, help_text='block or room number')
     city = models.CharField(max_length=200, null=False, blank=False)
@@ -343,21 +396,44 @@ class Shipping(models.Model):
     phone2 = models.CharField(max_length=25, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
+    # Function to get our customer name to use in our admin dashboard
+    @property
+    def customer_name(self):
+        if self.customer.user:
+            name = f'{self.customer.user.first_name} {self.customer.user.last_name}'
+        elif self.customer.name:
+            name = self.customer.name
+        elif self.customer.device:
+            name = self.customer.device
+        elif self.customer is None:
+            name = ''
+        return str(name)
+
+
     def __str__(self):
-        return f'{self.customer.name} {self.address}'
-    
+        return f'{self.customer_name} {self.address}'
+
+
+
+
+
+# This model saves messages from users on our contact page
 class Message(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
     location = models.CharField(max_length=200, null=False, blank=False)
     email = models.EmailField(max_length=100, null=False, blank=False)
     subject = models.CharField(max_length=100, null=False, blank=False)
     message = models.TextField(max_length=3000, null=False, blank=False)
-    date_sent = models.DateTimeField(auto_now_add=True)
+    date_received = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f'{self.date_sent}'
 
 
+
+
+
+# This model mails our users on products or updates before saving
 class Newsletter(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     subject = models.CharField(max_length=160, blank=False, null=False)
