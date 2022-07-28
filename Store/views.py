@@ -71,7 +71,7 @@ def index(request):
         device = request.COOKIES['device']
     except:
         # If not set one using our generated cookie_code
-        response.set_cookie('device', cookie_code)
+        response.set_cookie('device', cookie_code, max_age=int(365*24*60*60))
     return response
 
 
