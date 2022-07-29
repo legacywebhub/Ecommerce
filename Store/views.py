@@ -108,6 +108,42 @@ def products(request, search):
 
 
 
+def specialOffer(request):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+
+    # Looping through our products and add any which percentage discount
+    # is more than %15 to an empty list
+    all_products = Product.objects.all()
+    products_list = []
+    for product in all_products:
+        if product.discount_in_percentage > 15:
+            products_list.append(product)
+
+    p = Paginator(products_list, 18)
+    page = request.GET.get('page')
+    products = p.get_page(page)
+    products_count = len(products_list)
+    
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+    
+    context = {
+        'products':products,
+        'products_count':products_count,
+        'item_total': order_data['item_total'],
+        'total': order_data['total'],
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products
+    }
+    return render(request, 'special_offers.html', context)
+
+
+
+
+
 def category(request, category):
     # Getting our customer and his order
     order_data = getCustomerAndOrder(request)

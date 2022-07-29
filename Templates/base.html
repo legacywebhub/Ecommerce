@@ -117,7 +117,7 @@
     <ul id="topMenu" class="nav pull-right">
 	{% if user.is_authenticated %}
 	 <li class=""><a href="{% url 'Store:profile' request.user.id %}">Profile</a></li>
-	 <li class=""><a href="special_offer.html">Specials Offer</a></li>
+	 <li class=""><a href="{% url 'Store:special' %}">Specials Offer</a></li>
 	 {% endif %}
 	 <li class=""><a href="{% url 'Store:contact' %}">Contact</a></li>
 	 <li class="">
@@ -173,8 +173,10 @@
 			<div class="span3">
 				<h5>OUR OFFERS</h5>
 				<a href="#">NEW PRODUCTS</a> 
-				<a href="#">TOP SELLERS</a>  
-				<a href="special_offer.html">SPECIAL OFFERS</a>  
+				<a href="#">TOP SELLERS</a>
+				{% if user.is_authenticated %}  
+				<a href="{% url 'Store:special' %}">SPECIAL OFFERS</a>
+				{% endif %} 
 				<a href="#">MANUFACTURERS</a> 
 				<a href="#">SUPPLIERS</a> 
 			 </div>
