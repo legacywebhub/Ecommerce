@@ -44,9 +44,10 @@
 				<img src="{{ product.image1.url }}" alt="product_image"/>
 			</div>
 			<div class="span4">
-				<h3>{{ product.category }}</h3>				
+				<h3>{{ product.name }}</h3>
+				<h5 class="percentage-discount">%{{ product.discount_in_percentage }} off</h5>			
 				<hr class="soft"/>
-				<h5>{{ product }} </h5>
+				<h5>{{ product.category }} </h5>
 				<p>
 					{{ product.description|truncatewords:30 }}
 				</p>
@@ -55,13 +56,13 @@
 			</div>
 			<div class="span3 alignR">
 			<form class="form-horizontal qtyFrm">
-			<h3> {{company.currency_symbol}}{{ product.price }}</h3>
+				<h4><strike style="color:red">{{company.currency_symbol}}{{ product.price }}</strike> {{company.currency_symbol}}{{ product.discount_price }}</h4>
 			<label class="checkbox">
 				<input type="checkbox">  Adds product to compare
 			</label><br/>
 			
 			  <a href="#" class="btn btn-large btn-primary update-cart" data-product="{{product.id}}" data-action="add"> Add to <i class=" icon-shopping-cart"></i></a>
-			  <a href="#" class="btn btn-large"><i class="icon-zoom-in"></i></a>
+			  <a href="{% url 'Store:detail' product.id %}" class="btn btn-large"><i class="icon-zoom-in"></i></a>
 			
 				</form>
 			</div>
@@ -81,12 +82,15 @@
 			  <div class="thumbnail">
 				<a href="{% url 'Store:detail' product.id %}"><img src="{{ product.image1.url }}" alt="product image"/></a>
 				<div class="caption">
-				  <h5>{{ product }}</h5>
+				  <h5>{{ product.name }}</h5>
 				  <p> 
-					{{ product.description|truncatewords:15 }} 
+					{{ product.description|truncatewords:5 }}
 				  </p>
-				   <h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{product.id}}" data-action="add" href="#">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{ product.price }}</a></h4>
+				   <h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{product.id}}" data-action="add" href="#">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{ product.discount_price }}</a></h4>
 				</div>
+				{% if product.discount_in_percentage > 0 %}
+				<span class="discount">%{{ product.discount_in_percentage }} off</span>
+				{% endif %}
 			  </div>
 			</li>
 			{% endfor %}

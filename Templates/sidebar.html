@@ -2,10 +2,10 @@
 
 <!-- Sidebar ================================================== -->
 <div id="sidebar" class="span3">
-	<div class="well well-small"><a id="myCart" href="product_summary.html"><img src="{% static 'themes/images/ico-cart.png' %}" alt="cart">{{item_total}} Item(s) in your cart  <span class="badge badge-warning pull-right">{{company.currency_symbol}}{{total}}</span></a></div>
+	<div class="well well-small"><a id="myCart" href="{% url 'Store:cart' %}"><img src="{% static 'themes/images/ico-cart.png' %}" alt="cart">{{item_total}} Item(s) in your cart  <span class="badge badge-warning pull-right">{{company.currency_symbol}}{{total}}</span></a></div>
 	<ul id="sideManu" class="nav nav-tabs nav-stacked">
 		{% for category in categories %}
-		<li class="subMenu open"><a> <span class="category">{{category}}</span> [{{category.productcategory_set.all.count}}]</a><!--productcategory.objects.filter(category=category).count-->
+		<li class="subMenu open"><a> <span class="category">{{category}}</span> [{{category.productcategory_set.all.count}}]</a>
 			<ul>
 			{% for product_category in category.productcategory_set.all %}
 			<li><a class="active" href="{% url 'Store:category' product_category.id %}"><i class="icon-chevron-right"></i><span class="category">{{product_category}}</span> ({{product_category.product_set.all.count}}) </a></li>
@@ -15,6 +15,7 @@
 		{% endfor %}
 	</ul>
 	<br/>
+	<h5>Products you may like</h5><br/>
 		{% for hot_product in hot_products %}
 		<div class="thumbnail">
 		{% if hot_product.image1 %}
@@ -24,7 +25,7 @@
 		{% endif %}
 		<div class="caption">
 			<h5 style="text-transform: capitalize;">{{hot_product.name}}</h5>
-			<h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' hot_product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{ product.id }}" data-action="add">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{hot_product.price}}</a></h4>
+			<h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' hot_product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{ product.id }}" data-action="add">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{hot_product.discount_price}}</a></h4>
 		</div>
 		</div><br/>
 		{% endfor %}
@@ -34,6 +35,6 @@
 			<div class="caption">
 				<h5>Payment Methods</h5>
 			</div>
-			</div>
+		</div>
 </div>
 <!-- Sidebar end=============================================== -->

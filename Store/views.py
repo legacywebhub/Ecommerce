@@ -31,7 +31,8 @@ cookie_code = generateUniqueId()
 # Create your views here.
 
 def index(request):
-    p = Paginator(Product.objects.all(), 3)
+    new_products = Product.objects.all().order_by('-date_uploaded')[:4]
+    p = Paginator(Product.objects.all(), 18)
     page = request.GET.get('page')
     products = p.get_page(page)
     
@@ -59,7 +60,8 @@ def index(request):
         'item_total': item_total,
         'total': total,
         'categories' : categories,
-        'hot_products':hot_products
+        'hot_products':hot_products,
+        'new_products': new_products
     }
 
     # Setting up our response object
@@ -84,7 +86,7 @@ def products(request, search):
 
     products_list = Product.objects.filter(name__contains=search)
     products_count = products_list.count
-    p = Paginator(products_list, 3)
+    p = Paginator(products_list, 18)
     page = request.GET.get('page')
     products = p.get_page(page)
     
@@ -151,7 +153,7 @@ def category(request, category):
     products_list = Product.objects.filter(category=category)
     category = ProductCategory.objects.get(id=category)
     products_count = products_list.count
-    p = Paginator(products_list, 3)
+    p = Paginator(products_list, 18)
     page = request.GET.get('page')
     products = p.get_page(page)
     

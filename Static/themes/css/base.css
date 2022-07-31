@@ -24,6 +24,8 @@
 .thumbnail a img{max-height: 200px}
 .thumbnail h5,.thumbnail p{text-align:center}
 .thumbnail .discount {display: inline-block; position: absolute; top: 0; right: 0; z-index:100; background-color: rgba(2, 194, 2, 0.801); color:#fff; font-weight: bold; font-style: italic; padding: 10px; border-radius: 50%; }
+.percentage-discount {font-style: italic; color: rgba(2, 194, 2, 0.801); display:block;}
+.dim { opacity: 0.5;}
 /* Product page--- */
 .alignR{text-align:right;}
 .control-label.alignL, .alignL{text-align:left;}

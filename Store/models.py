@@ -207,11 +207,12 @@ class ProductCategory(models.Model):
 
 # Product model
 class Product(models.Model):
+    date_uploaded = models.DateField(auto_now=True) # this is the uploaded date
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=200, null=False, blank=False)
     brand = models.CharField(max_length=200, null=True, blank=True)
     model = models.CharField(max_length=200, null=True, blank=True)
-    image1 = models.ImageField(upload_to='Images/Products',blank=False, null=False)
+    image1 = models.ImageField(upload_to='Images/Products',blank=True, null=True)
     image2 = models.ImageField(upload_to='Images/Products',blank=True, null=True)
     image3 = models.ImageField(upload_to='Images/Products',blank=True, null=True)
     image_url1 = models.URLField(max_length=3000, blank=True, null=True)
@@ -223,12 +224,12 @@ class Product(models.Model):
     weight = models.CharField(max_length=50, blank=True, null=True)
     digital = models.BooleanField(default=False, null=False, blank=False)
     description = models.TextField(max_length=3000, null=True, blank=False)
-    date_released = models.DateField(blank=True, null=True)
+    date_released = models.DateField(blank=True, null=True) # this is the release date of manufacturers
     price = models.FloatField()
     discount_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
     tax_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
-    shipping_fee = models.FloatField()
-    hot = models.BooleanField(default=True, null=False, blank=False)  # hot here means demand
+    shipping_fee = models.FloatField(default=0, null=False, blank=False)
+    hot = models.BooleanField(default=True, null=False, blank=False)  # hot here means 'in demand'
     available = models.BooleanField(default=True, null=False, blank=False)
 
     # Function to calculate our discount in amount based on input discount percentage
@@ -299,26 +300,26 @@ class Order(models.Model):
         orderitems = self.orderitem_set.all()
         total = sum([item.item_price_total for item in orderitems])
         return  total
-    
-    # Function to sum up discount for all order items in our cart
+
+    # Function to sum up DISCOUNT prices for all order items in our cart 
     @property
-    def discount_total(self):
+    def discount_price_total(self):
         orderitems = self.orderitem_set.all()
-        total = sum([item.product.discount for item in orderitems])
-        return total
+        total = sum([item.item_discount_price_total for item in orderitems])
+        return  total
     
     # Function to sum up tax for all order items in our cart
     @property
     def tax_total(self):
         orderitems = self.orderitem_set.all()
-        total = sum([item.product.tax for item in orderitems])
+        total = sum([item.item_tax_total for item in orderitems])
         return total
 
     # Function to sum up shipping fee for all order items in our cart
     @property
     def shipping_fee_total(self):
         orderitems = self.orderitem_set.all()
-        total = sum([item.product.shipping_fee for item in orderitems])
+        total = sum([item.item_shipping_fee_total for item in orderitems])
         return total
     
     # Function to sum up total order items in our cart and reset when order is delivered
@@ -336,7 +337,7 @@ class Order(models.Model):
     # Function to calculate total bill of customer using other functions
     @property
     def total(self):
-        total = (self.price_total + self.shipping_fee_total + self.tax_total) - self.discount_total
+        total = self.discount_price_total + self.shipping_fee_total + self.tax_total
         return total
     
     # Function to loop through our products to check if there is a physical product for shipping
@@ -377,7 +378,31 @@ class OrderItem(models.Model):
     def item_price_total(self):
         total = self.product.price * self.quantity
         return total
+
+    # Function to calculate DISCOUNT price of item by it's quantity
+    @property
+    def item_discount_price_total(self):
+        total = self.product.discount_price * self.quantity
+        return total
+
+    # Function to calculate shipping fee of item by it's quantity
+    @property
+    def item_shipping_fee_total(self):
+        total = self.product.shipping_fee * self.quantity
+        return total
     
+    # Function to calculate tax of item by it's quantity
+    @property
+    def item_tax_total(self):
+        total = self.product.tax * self.quantity
+        return total
+
+    # Function to calculate total bill or expenditure of item by it's quantity
+    @property
+    def item_total_bill(self):
+        total = self.item_discount_price_total + self.item_shipping_fee_total + self.item_tax_total
+        return total
+
 
 
 
