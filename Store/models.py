@@ -132,6 +132,10 @@ class MyUser(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
 
+    # Function to get url per user for sitemapping
+    def get_absolute_url(self):
+        return f'/profile/{self.id}'
+
     '''
     Make sure to set this custom model as our user model in settings.py
     AUTH_USER_MODEL = "App.CustomUserModel"
@@ -279,6 +283,9 @@ class Product(models.Model):
         category = ProductCategory.objects.get(id=self.category)
         return category.product_category
     
+    # Function to get product url per item for site mapping
+    def get_absolute_url(self):
+        return f'/product/{self.id}'
 
 
 

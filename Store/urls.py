@@ -2,6 +2,16 @@ from django.urls import path, reverse_lazy
 from . import views
 # For password reset
 from django.contrib.auth import views as auth_views
+# Site map
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import StaticViewSitemap, MyUserSitemap, ProductSitemap
+
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'myuser': MyUserSitemap,
+    'product': ProductSitemap,
+}
 
 app_name='Store'
 urlpatterns = [
@@ -53,4 +63,7 @@ urlpatterns = [
     template_name="password_reset_complete.html"
     ), 
     name="password_reset_complete"),
+
+    # Sitemap
+    path('sitemap.xml/', sitemap, {'sitemaps':sitemaps}),
 ]
