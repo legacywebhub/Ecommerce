@@ -204,14 +204,39 @@ def detail(request, pk):
     # Getting our customer and his order
     order_data = getCustomerAndOrder(request)
     product = Product.objects.get(id=pk)
+    related_products = Product.objects.filter(name__contains=product.name).order_by('?')[:6]
     
     if request.method == 'POST':
-        search = request.POST['search']
-        return redirect('/products/'+search)
+        if 'add-item-quantity' in request.POST:
+            quantity = request.POST['quantity']
+            orderItem, created = OrderItem.objects.get_or_create(order=order_data['order'], product=product)
+
+            if quantity == 0:
+                orderItem.delete()
+            else:
+                orderItem.quantity = quantity
+                orderItem.save()
+            return redirect('Store:cart')
+
+            '''
+            This is another way to write the code.. Either by checking the quantity first before doing
+            any operation or setting quantity to order item before checking and doing operations
+
+            orderItem.quantity = quantity
+
+            if orderItem.quantity == 0:
+                orderItem.delete()
+            else:
+                orderItem.save()
+            ''' 
+        elif 'search' in request.POST:
+            search = request.POST['search']
+            return redirect('/products/'+search)
 
     context = {
         'company': company,
         'product': product,
+        'related_products': related_products,
         'item_total': order_data['item_total'],
         'total': order_data['total'],
         'categories' : categories,

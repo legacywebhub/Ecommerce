@@ -228,6 +228,7 @@ class Product(models.Model):
     weight = models.CharField(max_length=50, blank=True, null=True)
     digital = models.BooleanField(default=False, null=False, blank=False)
     description = models.TextField(max_length=3000, null=True, blank=False)
+    manufacturer_review = models.TextField(max_length=10000, null=True, blank=False)
     date_released = models.DateField(blank=True, null=True) # this is the release date of manufacturers
     price = models.FloatField()
     discount_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
