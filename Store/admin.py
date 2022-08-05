@@ -10,7 +10,7 @@ class CompanyInfoAdmin(admin.ModelAdmin):
 
     def logo(self, obj):
         if obj.logo:
-            logo = format_html(f'<img src="/Media/{obj.logo}" style="width:100px;">')
+            logo = format_html(f'<img src="/media/{obj.logo}" style="width:100px;">')
         else:
             logo = ''
         return logo
@@ -46,7 +46,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     def product_image(self, obj):
         if obj.image1:
-            image = format_html(f'<img src="/Media/{obj.image1}" style="width:100px;">')
+            image = format_html(f'<img src="/media/{obj.image1}" style="width:100px;">')
         elif obj.image_url1:
             image = format_html(f'<img src="{obj.image_url1}" style="width:100px;">')
         else:

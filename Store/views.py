@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from multiprocessing import context
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import *
 from django.http import JsonResponse
@@ -151,7 +152,7 @@ def category(request, category):
     order_data = getCustomerAndOrder(request)
 
     products_list = Product.objects.filter(category=category)
-    category = ProductCategory.objects.get(id=category)
+    category = get_object_or_404(Product, id=category)
     products_count = products_list.count
     p = Paginator(products_list, 18)
     page = request.GET.get('page')
@@ -203,7 +204,7 @@ def cart(request):
 def detail(request, pk):
     # Getting our customer and his order
     order_data = getCustomerAndOrder(request)
-    product = Product.objects.get(id=pk)
+    product = get_object_or_404(Product, id=pk)
     related_products = Product.objects.filter(name__contains=product.name).order_by('?')[:6]
     
     if request.method == 'POST':
@@ -333,12 +334,12 @@ def logout(request):
 @login_required
 def profile(request, user_id):
     user_instance = MyUser.objects.get(id=user_id)
-    user_shipping = ShippingDetail.objects.get(user=user_instance)
+    user_shipping = get_object_or_404(ShippingDetail, user=user_instance)
     # This forms here solves our bug issue after saving either of our forms
     user_form = MyUserForm(instance=user_instance)
     shipping_form = ShippingForm(instance=user_shipping)
     # Since we are sure this user is authenticated, we get the customer connected to this user directly
-    customer = Customer.objects.get(user=user_instance)
+    customer = get_object_or_404(Customer, user=user_instance)
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
     item_total = order.item_total
     total = order.total
@@ -504,6 +505,47 @@ def tac(request):
         'hot_products':hot_products
     }
     return render(request, 'tac.html', context)
+
+
+
+
+
+def error404(request, exception):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
+    context = {
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products
+    }
+    return render(request, '404.html', context)
+
+
+
+
+
+def serverError(request):
+    # Getting our customer and his order
+    order_data = getCustomerAndOrder(request)
+        
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+    
+    context = {        
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products}
+    return render(request, '500.html', context)
 
 
 

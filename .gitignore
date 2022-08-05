@@ -105,7 +105,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -130,4 +129,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# My Ignores
+StaticFiles/
+Media/
+.env
 Ecommerce/.env
+todo.txt
