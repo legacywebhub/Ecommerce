@@ -231,7 +231,7 @@ class Product(models.Model):
     manufacturer_review = models.TextField(max_length=10000, null=True, blank=False)
     date_released = models.DateField(blank=True, null=True) # this is the release date of manufacturers
     price = models.FloatField()
-    discount_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
+    percentage_discount = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
     tax_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
     shipping_fee = models.FloatField(default=0, null=False, blank=False)
     hot = models.BooleanField(default=True, null=False, blank=False)  # hot here means 'in demand'
@@ -240,7 +240,7 @@ class Product(models.Model):
     # Function to calculate our discount in amount based on input discount percentage
     @property
     def discount(self):
-        discount = (self.discount_in_percentage/100) * self.price
+        discount = (self.percentage_discount/100) * self.price
         return discount
 
     # Function to calculate discount price

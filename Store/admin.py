@@ -40,7 +40,7 @@ class ShippingDetailAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
     exclude = ('date_uploaded',)
-    list_display = ('name', 'category', 'product_image', 'price', 'discount_in_percentage')
+    list_display = ('name', 'category', 'product_image', 'price', 'percentage_discount')
     list_filter = ('category', 'available', 'digital', 'date_uploaded',)
     list_per_page = 20
 

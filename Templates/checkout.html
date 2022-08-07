@@ -6,7 +6,6 @@
 #payment-container {
 	background-color: #fafafa;
 	margin: 5px 0px;
-	margin-left: 30px;
 	padding: 10px;
 	border: solid .5px #fafafa;
 	border-radius: 3px;
@@ -20,23 +19,46 @@
 
 {% block body %}
 <div class="span9">
-<table class="table table-bordered">
-	<tbody>
-	{% for item in items %}
-	<tr>
-		<td> <img width="60" src="{{ item.product.image1.url }}" alt="product image"/></td>
-		<td>{{ item.product.name }}</td>
-		<td>
-		<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="subtract" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
-		</td>
-		<td>{{company.currency_symbol}}{{ item.product.price }}</td>
-		<td>{{company.currency_symbol}}{{ item.product.discount }}</td>
-		<td>{{company.currency_symbol}}{{ item.product.tax }}</td>
-		<td>{{company.currency_symbol}}{{ item.price_total }}</td>
-	</tr>
-	{% endfor %}
-	</tbody>
-</table>
+	<table class="table table-bordered">
+		<thead>
+		  <tr>
+			<th>Product</th>
+			<th>Description</th>
+			<th>Quantity</th>
+			<th>Price</th>
+			<th>Shipping fee per item</th>
+			<th>Tax</th>
+			<th>Total</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  {% for item in items %}
+		  <tr>
+			<td>
+			{% if item.product.image1 %}
+			<a href="{% url 'Store:detail' item.product.id %}"><img width="60" src="{{ item.product.image1.url }}" alt="product image"/></a>
+			{% else %}
+			<a href="{% url 'Store:detail' item.product.id %}"><img width="60" src="{{ item.product.image_url1 }}" alt="product image"/></a>
+			{% endif %}
+			</td>
+			<td>{{ item.product.name }}</td>
+			<td>
+			  <div class="">{{ item.quantity }}</div> <!-- <button class="btn update-cart" data-product="{{item.product.id}}" data-action="subtract" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button> -->
+			</td>
+			<td>{{ item.product.discount_price }} <span class="dim">x{{item.quantity}}</span></td>
+			<td>{{ item.product.shipping_fee }} <span class="dim">x{{item.quantity}}</span></td>
+			<td>{{ item.product.tax }} <span class="dim">x{{item.quantity}}</span></td>
+			<td>{{company.currency_symbol}}{{ item.item_total_bill }}</td>
+		  </tr>
+		  {% endfor %}
+
+		   <tr>
+			<td colspan="6" style="text-align:right"><strong>TOTAL ({{company.currency_symbol}}{{order.discount_price_total}} + {{company.currency_symbol}}{{order.shipping_fee_total}} + {{company.currency_symbol}}{{order.tax_total}}) =</strong></td>
+			<td class="label label-important" style="display:block"> <strong> {{company.currency_symbol}}{{ order.total }} </strong></td>
+		  </tr>
+		  </tbody>
+	  </table>
+  <br><br>
 </div>
 
 
@@ -158,9 +180,11 @@
 </table>
 
 <div id="payment-container">
-	<p style="font-size:18px">Make Payment</p><hr>
-	<button id="paypal" class="btn btn-large">PayPal</button></p>
-	<button id="paystack" class="btn btn-large">Paystack</button></p>
+	<h4 style="font-size:18px; opacity:.6">PAYMENT METHODS</h4><hr>
+	<div class="span4">
+	<button id="paystack" class="btn btn-large btn-primary">Paystack <img src="{% static 'themes/images/paystack.png' %}"></button>
+	<div id="paypal-button-container"></div>
+	</div>
 </div>
 
 </div>
@@ -173,6 +197,8 @@
 {% block script %}
 <!-- Paystack Inline CDN -->
 <script src="https://js.paystack.co/v2/inline.js"></script>
+<!-- Paypal Inline CDN -->
+<script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD&disable-funding=credit"></script>
 
 <script type="text/javascript">
 	//THIS ENTIRE SCRIPT CODE IS FOR CHECKOUT AND PAYMENT PROCESSING
@@ -298,9 +324,43 @@ function payWithPaystack() {
 		})
 		.then((data)=>{
 			console.log('success:', data)
-			alert('Transaction complete!')
+			alert(`Transaction was succesful!  Reference Id: ${ref}`)
 			window.location.href = "{% url 'Store:index' %}"
 		})
 	}
-	</script>
+
+	// Render the PayPal button into #paypal-button-container
+	paypal.Buttons({
+
+		// Set up the transaction
+		createOrder: function(data, actions) {
+			return actions.order.create({
+				purchase_units: [{
+					amount: {
+						value: total
+					}
+				}]
+			});
+		},
+
+		// Finalize the transaction
+		onApprove: function(data, actions) {
+			return actions.order.capture().then(function(orderData) {
+				// Successful capture! For demo purposes:
+				console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+				var transaction = orderData.purchase_units[0].payments.captures[0];
+				submitFormData(transaction.id)
+				alert('Transaction succesful! '+ transaction.status + ': ' + transaction.id);
+
+				// Replace the above to show a success message within this page, e.g.
+				// const element = document.getElementById('paypal-button-container');
+				// element.innerHTML = '';
+				// element.innerHTML = '<h3>Thank you for your payment!</h3>';
+				// Or go to another URL:  actions.redirect('thank_you.html');
+			});
+		}
+
+
+	}).render('#paypal-button-container');
+</script>
 {% endblock %}

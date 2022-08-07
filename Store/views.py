@@ -120,7 +120,7 @@ def specialOffer(request):
     all_products = Product.objects.all()
     products_list = []
     for product in all_products:
-        if product.discount_in_percentage > 15 and product.shipping_fee == 0:
+        if product.percentage_discount > 15 and product.shipping_fee == 0:
             products_list.append(product)
 
     p = Paginator(products_list, 18)

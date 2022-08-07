@@ -29,11 +29,17 @@
               <tbody>
 			    {% for item in items %}
                 <tr>
-                  <td> <a href="{% url 'Store:detail' item.product.id %}"><img width="60" src="{{ item.product.image1.url }}" alt="product image"/></a></td>
+                  <td>
+                  {% if item.product.image1 %}
+                  <a href="{% url 'Store:detail' item.product.id %}"><img width="60" src="{{ item.product.image1.url }}" alt="product image"/></a>
+                  {% else %}
+                  <a href="{% url 'Store:detail' item.product.id %}"><img width="60" src="{{ item.product.image_url1 }}" alt="product image"/></a>
+                  {% endif %}
+                  </td>
                   <td><a href="{% url 'Store:detail' item.product.id %}">{{ item.product.name }}</a></td>
-				  <td>
-					<div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="subtract" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
-				  </td>
+				          <td>
+					        <div class="input-append"><input class="span1" style="max-width:34px" placeholder="{{ item.quantity }}" value="{{ item.quantity }}" id="appendedInputButtons" size="16" type="text"><button class="btn update-cart" data-product="{{item.product.id}}" data-action="subtract" type="button"><i class="icon-minus"></i></button><button class="btn update-cart" data-product="{{item.product.id}}" data-action="add" type="button"><i class="icon-plus"></i></button><button class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" type="button"><i class="icon-remove icon-white"></i></button></div>
+				          </td>
                   <td>{{ item.product.discount_price }} <span class="dim">x{{item.quantity}}</span></td>
                   <td>{{ item.product.shipping_fee }} <span class="dim">x{{item.quantity}}</span></td>
                   <td>{{ item.product.tax }} <span class="dim">x{{item.quantity}}</span></td>

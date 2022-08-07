@@ -45,7 +45,7 @@
 			</div>
 			<div class="span4">
 				<h3>{{ product.name }}</h3>
-				<h5 class="percentage-discount">%{{ product.discount_in_percentage }} off</h5>			
+				<h5 class="percentage-discount">%{{ product.percentage_discount }} off</h5>			
 				<hr class="soft"/>
 				<h5>{{ product.category }} </h5>
 				<p>
@@ -88,8 +88,8 @@
 				  </p>
 				   <h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{product.id}}" data-action="add" href="#">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{ product.discount_price }}</a></h4>
 				</div>
-				{% if product.discount_in_percentage > 0 %}
-				<span class="discount">%{{ product.discount_in_percentage }} off</span>
+				{% if product.percentage_discount > 0 %}
+				<span class="discount">%{{ product.percentage_discount }} off</span>
 				{% endif %}
 			  </div>
 			</li>
