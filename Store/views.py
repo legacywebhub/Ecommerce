@@ -437,7 +437,7 @@ def checkout(request):
         'total': order_data['total'], 
         'customer': order_data['customer'], 
         'company': company,
-        'public_key': settings.PUBLIC_KEY,
+        'public_key': settings.PAYSTACK_PUBLIC_KEY,
         'categories' : categories,
         'hot_products':hot_products
     }
@@ -649,4 +649,4 @@ def processOrder(request):
 
     print('shipping details saved')
     
-    return JsonResponse('Payment submitted...', safe=False)
+    return JsonResponse('Payment and checkout was successful', safe=False)

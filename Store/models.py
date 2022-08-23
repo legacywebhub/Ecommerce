@@ -460,7 +460,7 @@ class Message(models.Model):
     date_received = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f'{self.date_sent}'
+        return f'{self.date_received}'
 
 
 

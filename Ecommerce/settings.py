@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import django_heroku
 from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1ibnle((g9a!@xb(900gyna$t&le$)ql)6b9-kuad@sh3@h+&6'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'bootshop.herokuapp.com']
 
 
 # Application definition
@@ -89,6 +91,10 @@ DATABASES = {
     }
 }
 
+# postgres settings for heroku
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -141,8 +147,8 @@ LOGIN_REDIRECT_URL = 'Store:index'
 LOGIN_URL = 'Users:login'
 
 # Payment Integration
-SECRET_KEY = config('SECRET_KEY')
-PUBLIC_KEY = config('PUBLIC_KEY')
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 
 
 # EMAIL SETTINGS
@@ -152,3 +158,12 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
+
+
+# Deployment settings
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', cast=bool)
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', cast=bool)
+
+
+# HEROKU SETTINGS
+django_heroku.settings(locals())
