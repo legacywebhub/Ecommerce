@@ -164,6 +164,9 @@
 			 </div>
 			<div class="span3">
 				<h5>INFORMATION</h5>
+				{% if request.user.is_superuser %}
+				<a href="{% url 'Store:newsletter' %}">NEWSLETTER</a>  
+				{% endif %}
 				<a href="{% url 'Store:contact' %}">CONTACT</a>  
 				<a href="{% url 'Store:login' %}">REGISTRATION</a>  
 				<a href="{% url 'Store:legal' %}">LEGAL NOTICE</a>  

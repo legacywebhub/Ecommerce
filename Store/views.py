@@ -551,6 +551,59 @@ def serverError(request):
 
 
 
+def newsletter(request):
+    # Getting request user order
+    order_data = getCustomerAndOrder(request)
+    # getting all users email
+    emails = MyUser.objects.all()
+    # the following line of codes converts the query to a list object
+    # using the read_mail function from django-pandas external module
+    df = read_frame(emails, fieldnames=['email'])
+    mail_list = df['email'].values.tolist()
+
+    if request.method=="POST":
+        if 'newsletter-submit' in request.POST:
+            subject = request.POST['subject']
+            message = request.POST['message']
+            file = request.POST['file']
+
+            if request.user.is_superuser:
+                if 'file' in request.POST:
+                    
+                    try:
+                        email = EmailMessage(subject, message, company.email1, mail_list)
+                        email.content_subtype = 'html'
+                        email.attach(file.name, file.read(), file.content_type)
+                        email.send()
+                        messages.success(request, 'Message and file succesfully sent to mail list')
+                    except:
+                        messages.error(request, 'Sorry... There was an error while forwarding newsletter')
+                        
+                else:
+                    try:
+                        send_mail(subject, message, company.email1, mail_list, fail_silently=False)
+                        messages.success(request, 'Message succesfully sent to mail list')
+                    except:
+                        messages.error(request, 'Sorry... There was an error while forwarding newsletter')
+            else:
+                messages.error(request, 'Sorry... Only admins can forward newsletters')
+        elif 'search' in request.POST:
+            search = request.POST['search']
+            return redirect('/products/'+search)
+    
+    context = {        
+        'item_total': order_data['item_total'],
+        'total': order_data['total'], 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products,
+        }
+    return render(request, 'newsletter.html', context)
+
+
+
+
+
 # Pseudo Views
 
 def updateItem(request):

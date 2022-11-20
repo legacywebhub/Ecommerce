@@ -27,6 +27,7 @@ urlpatterns = [
     path('legal-notice/', views.legal, name='legal'),
     path('tac/', views.tac, name='tac'),
     path('checkout/', views.checkout, name='checkout'),
+    path('newsletter/', views.newsletter, name='newsletter'),
 
     # Pseudo urls and paths
     path('update_item/', views.updateItem, name='update_item'),
