@@ -222,11 +222,13 @@ class Product(models.Model):
     image_url1 = models.URLField(max_length=3000, blank=True, null=True)
     image_url2 = models.URLField(max_length=3000, blank=True, null=True)
     image_url3 = models.URLField(max_length=3000, blank=True, null=True)
+    digital = models.BooleanField(default=False, null=False, blank=False)
+    file = models.FileField(upload_to="Documents/Products", blank=True, null=True)
+    file_link = models.URLField(max_length=3000, blank=True, null=True)
     size = models.CharField(max_length=100, blank=True, null=True)
     dimensions = models.CharField(max_length=100, blank=True, null=True)
     color = models.CharField(max_length=50, blank=True, null=True)
     weight = models.CharField(max_length=50, blank=True, null=True)
-    digital = models.BooleanField(default=False, null=False, blank=False)
     description = models.TextField(max_length=3000, null=True, blank=False)
     manufacturer_review = models.TextField(max_length=10000, null=True, blank=False)
     date_released = models.DateField(blank=True, null=True) # this is the release date of manufacturers
@@ -234,7 +236,7 @@ class Product(models.Model):
     percentage_discount = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
     tax_in_percentage = models.PositiveSmallIntegerField(default=0, choices=[(i, i) for i in range(0, 100)])
     shipping_fee = models.FloatField(default=0, null=False, blank=False)
-    hot = models.BooleanField(default=True, null=False, blank=False)  # hot here means 'in demand'
+    hot = models.BooleanField(default=True, null=False, blank=False, help_text="Means high in demand")  # hot here means 'in demand'
     available = models.BooleanField(default=True, null=False, blank=False)
 
     # Function to calculate our discount in amount based on input discount percentage
@@ -309,7 +311,8 @@ class Order(models.Model):
         total = sum([item.item_price_total for item in orderitems])
         return  total
 
-    # Function to sum up DISCOUNT prices for all order items in our cart 
+    # Function to sum up DISCOUNT prices for all order items in our cart
+    # Note that we are using discount prices rather than actual price
     @property
     def discount_price_total(self):
         orderitems = self.orderitem_set.all()
@@ -354,6 +357,7 @@ class Order(models.Model):
         shipping = False
         orderitems = self.orderitem_set.all()
         for i in orderitems:
+            # if no digital product then we need to ship
             if i.product.digital == False:
                 shipping = True
         return shipping
@@ -361,10 +365,14 @@ class Order(models.Model):
     # Function to get our customer name to use in our admin dashboard
     @property
     def customer_name(self):
-        if self.customer.name:
+        if self.customer.user:
+            name = f'{self.customer.user.first_name} {self.customer.user.last_name}'
+        elif self.customer.name:
             name = self.customer.name
         elif self.customer.device:
             name = self.customer.device
+        elif self.customer is None:
+            name = ''
         return str(name)
     
 

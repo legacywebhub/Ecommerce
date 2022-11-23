@@ -28,6 +28,7 @@ urlpatterns = [
     path('tac/', views.tac, name='tac'),
     path('checkout/', views.checkout, name='checkout'),
     path('newsletter/', views.newsletter, name='newsletter'),
+    path('success/<str:pk>/', views.success, name='success'),
 
     # Pseudo urls and paths
     path('update_item/', views.updateItem, name='update_item'),

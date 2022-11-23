@@ -4,11 +4,20 @@
 {% block style %}
 <style>
 #payment-container {
-	background-color: #fafafa;
-	margin: 5px 0px;
+	background-color: inherit;
+	margin: 5px 20px;
 	padding: 10px;
-	border: solid .5px #fafafa;
-	border-radius: 3px;
+}
+#payment-container button {
+	width: 100%;
+	margin: 7px 0;
+}
+#paypal-button-container {
+	margin-top: 7px;
+}
+#success-message {
+	margin: 20px;
+	font-weight: bold;
 }
 </style>
 {% endblock %}
@@ -18,7 +27,15 @@
 {% endblock  %}
 
 {% block body %}
+<!-- Paystack Inline CDN -->
+<script src="https://js.paystack.co/v2/inline.js"></script>
+<!-- Paypal Inline CDN -->
+<script src="https://www.paypal.com/sdk/js?client-id=AWdJ6mFjMGvF1XuR0C18sNv81xd2F56k-97WGuaZ2LBdSgOofV50QLX3FLQW-uMEbNBI49MCrmKQ5UY5&currency=USD&disable-funding=credit"></script>
+
 <div class="span9">
+	{% for message in messages %}
+	<p {% if message.tags %}class="message {{ message.tags }}"{% endif %}>{{message}}</p>
+	{% endfor %}
 	<table class="table table-bordered">
 		<thead>
 		  <tr>
@@ -61,6 +78,9 @@
   <br><br>
 </div>
 
+<div class="span9">
+	<h4 class="success" id="success-message"></h4>
+</div>
 
 <div id="shipping-container" class="span9">
 <table class="table table-bordered">
@@ -93,10 +113,10 @@
 <input type="hidden" value="{{user.shippingdetail.apartment}}" name="apartment" id="apartment" placeholder="apartment"/>
 <input type="hidden" value="{{user.shippingdetail.city}}" name="city" id="city" placeholder="city"/>
 <input type="hidden" value="{{user.shippingdetail.state}}" name="state" id="state" placeholder="state"/>
-<input type="hidden" name="{{user.shippingdetail.country}}" id="country" placeholder="country"/>
-<input type="hidden" name="{{user.shippingdetail.zipcode}}" id="zipcode" placeholder="zip/postal code"/> 
-<input type="hidden"  name="{{user.shippingdetail.phone1}}" id="phone1" placeholder="home phone"/>
-<input type="hidden"  name="{{user.shippingdetail.phone2}}" id="phone2" placeholder="mobile phone"/>
+<input type="hidden" value="{{user.shippingdetail.country}}" name="country" id="country" placeholder="country"/>
+<input type="hidden" value="{{user.shippingdetail.zipcode}}" name="zipcode" id="zipcode" placeholder="zip/postal code"/> 
+<input type="hidden"  value="{{user.shippingdetail.phone1}}" name="phone1" id="phone1" placeholder="home phone"/>
+<input type="hidden"  value="{{user.shippingdetail.phone2}}" name="phone2" id="phone2" placeholder="mobile phone"/>
 {% else %}
 <div class="control-group">
 	<label class="control-label" for="first-name">First Name<sup>*</sup></label>
@@ -179,27 +199,24 @@
 </tr>
 </table>
 
-<div id="payment-container">
+</div>
+
+<div class="span6" id="payment-container">
 	<h4 style="font-size:18px; opacity:.6">PAYMENT METHODS</h4><hr>
 	<div class="span4">
 	<button id="paystack" class="btn btn-large btn-primary">Paystack <img src="{% static 'themes/images/paystack.png' %}"></button>
+	<button id="flutterwave" class="btn btn-large btn-danger">Flutterwave <img src="{% static 'themes/images/flutterwave.png' %}"></button>
 	<div id="paypal-button-container"></div>
 	</div>
 </div>
+<br>
 
-</div>
-<br><br>
 
 
 	
 {% endblock %}
 
 {% block script %}
-<!-- Paystack Inline CDN -->
-<script src="https://js.paystack.co/v2/inline.js"></script>
-<!-- Paypal Inline CDN -->
-<script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD&disable-funding=credit"></script>
-
 <script type="text/javascript">
 	//THIS ENTIRE SCRIPT CODE IS FOR CHECKOUT AND PAYMENT PROCESSING
 
@@ -208,18 +225,21 @@
 	on our order Items. If we have then we display shipping-info form. 
 	else we hide the form
 	*/
-	let shipping = "{{order.shipping}}"
+	let shipping = "{{order.shipping}}",
 		total = parseInt("{{order.total}}"),
 		shippingContainer = document.getElementById('shipping-container'),
 		shippingForm = document.getElementById('shipping-form'),
 		formButton = document.getElementById('shipping-form-submit-button'),
 		paymentContainer = document.getElementById('payment-container'),
-		paypal = document.getElementById('paypal'),
-		paystack = document.getElementById('paystack'),
+		paystackBtn = document.getElementById('paystack'),
+		flutterwaveBtn = document.getElementById('flutterwave'),
 		shippingFormData = null;
-
 	
-	console.log(shipping)
+		paystackBtn.addEventListener('click', function(e){
+			e.preventDefault();
+			console.log('Paystack button clicked')
+			payWithPaystack();
+		})
 				 
 	//payment container is set hidden by default with this line
 	paymentContainer.classList.add("hidden")
@@ -227,7 +247,7 @@
     //hide entire form if shipping is false since we dont have a physical product
 	//to ship
 	if (shipping == 'False'){
-		shippingContainer.innerHTML = '';
+		shippingContainer.classList.add("hidden");
 	}
 
 	//this is for authenticated users having only digital products to pay for
@@ -236,61 +256,68 @@
 		shippingContainer.classList.add("hidden");
 		//show payment if user wants to pay for an item that is digital
 		paymentContainer.classList.remove("hidden");
+	} else if (shipping == 'False' && user == 'AnonymousUser') {
+		paymentContainer.classList.remove("hidden");
 	}
     
 	shippingForm.addEventListener('submit', (e)=>{
 		e.preventDefault()
+		//hide shipping form button
 		formButton.classList.add("hidden");
+		//show payment pop up buttons
 		paymentContainer.classList.remove("hidden");
 
-
-		paystack.addEventListener('click', function(e){
+		flutterwaveBtn.addEventListener('click', function(e){
 			e.preventDefault();
-			console.log('Paystack button clicked')
-			payWithPaystack();
-		})
-
-		paypal.addEventListener('click', function(e){
-			e.preventDefault();
-			console.log('Paypal button clicked')
+			console.log('Flutterwave button clicked')
 		})
 	})
 	
 
-//Functions
-function payWithPaystack() {
-  const paystack = new PaystackPop();
+	//Functions
+	function payWithPaystack() {
 
-  paystack.newTransaction({
+	let email;
 
-    key: '{{public_key}}', // Replace with your public key
+	if (document.getElementById('email') == null) {
+		email = "{{user.email}}";
+	} else {
+		email = document.getElementById('email').value;
+	}
 
-    email: document.getElementById('email').value,
 
-    amount: total * 100, // the amount value is multiplied by 100 to convert to the lowest currency unit
+	const paystack = new PaystackPop();
 
-    currency: "NGN", // Use GHS for Ghana Cedis or USD for US Dollars
+	paystack.newTransaction({
 
-    ref: "" + Math.floor(Math.random() * 1000000000 + 1), // Replace with a reference you generated
+		key: '{{public_key}}', // Replace with your public key
 
-    onSuccess: (transaction) => {
-      // Payment complete! Reference: transaction.reference
-	  console.log('success', transaction.reference)
-	  submitFormData(transaction.reference);
-    },
-  
-    onCancel: () => {
-      // user closed popup
-      alert('Payment aborted');
-    }
+		email: email,
 
-  });
-}
+		amount: total * 100, // the amount value is multiplied by 100 to convert to the lowest currency unit
+
+		currency: "NGN", // Use GHS for Ghana Cedis or USD for US Dollars
+
+		ref: "" + Math.floor(Math.random() * 1000000000 + 1), // Replace with a reference you generated
+
+		onSuccess: (transaction) => {
+			// Payment complete! Reference: transaction.reference
+			console.log('success', transaction.reference)
+			submitFormData(transaction.reference);
+		},
+	
+		onCancel: () => {
+			// user closed popup
+			alert('Payment aborted');
+		}
+
+	});
+	}
 
 	function submitFormData(ref){
 		let url = '/process_order/'
 
-		if (shipping != 'False'){
+		if (shipping == 'True'){
 			shippingFormData = {
 				'first-name': document.getElementById('first-name').value,
 				'last-name': document.getElementById('last-name').value,
@@ -306,61 +333,72 @@ function payWithPaystack() {
 				'total': total,
 				'transaction-id':ref
 			}
+			
+			console.log(shippingFormData)
+
+			fetch(url, {
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrftoken,
+				},
+				body: JSON.stringify({'shippingFormData':shippingFormData})
+			})
+			.then((response)=>{
+				data = response.json()
+				console.log('success:', data)
+				return data
+			})
+			.then((data)=>{
+				if (confirm(`Transaction was succesful!  Reference Id: ${ref}`)) {
+					success(ref);
+				}
+				success(ref);
+			})
+		} else {
+			success(ref);
 		}
 
-		console.log(shippingFormData)
+	}
 
-		fetch(url, {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-				'X-CSRFToken': csrftoken,
-			},
-			body: JSON.stringify({'shippingFormData':shippingFormData})
-		})
-		.then((response)=>{
-			data = response.json()
-			return data
-		})
-		.then((data)=>{
-			console.log('success:', data)
-			alert(`Transaction was succesful!  Reference Id: ${ref}`)
-			window.location.href = "{% url 'Store:index' %}"
-		})
+	function success(ref) {
+		document.getElementById('success-message').innerText = `Transaction was succesful!  Reference Id: ${ref}`;
+		sessionStorage.setItem('successMessage', `Transaction reference Id: ${ref}`);
+		window.location.href = "/success/{{order.id}}/";
 	}
 
 	// Render the PayPal button into #paypal-button-container
 	paypal.Buttons({
+	
+	// Set up the transaction
+	createOrder: function(data, actions) {
+		return actions.order.create({
+			purchase_units: [{
+				amount: {
+					value: total
+				}
+			}]
+		});
+	},
 
-		// Set up the transaction
-		createOrder: function(data, actions) {
-			return actions.order.create({
-				purchase_units: [{
-					amount: {
-						value: total
-					}
-				}]
-			});
-		},
+	// Finalize the transaction
+	onApprove: function(data, actions) {
+		return actions.order.capture().then(function(orderData) {
+			// Successful capture! For demo purposes:
+			console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+			var transaction = orderData.purchase_units[0].payments.captures[0];
+			submitFormData(transaction.id);
 
-		// Finalize the transaction
-		onApprove: function(data, actions) {
-			return actions.order.capture().then(function(orderData) {
-				// Successful capture! For demo purposes:
-				console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-				var transaction = orderData.purchase_units[0].payments.captures[0];
-				submitFormData(transaction.id)
-				alert('Transaction succesful! '+ transaction.status + ': ' + transaction.id);
-
-				// Replace the above to show a success message within this page, e.g.
-				// const element = document.getElementById('paypal-button-container');
-				// element.innerHTML = '';
-				// element.innerHTML = '<h3>Thank you for your payment!</h3>';
-				// Or go to another URL:  actions.redirect('thank_you.html');
-			});
-		}
+			// Replace the above to show a success message within this page, e.g.
+			// const element = document.getElementById('paypal-button-container');
+			// element.innerHTML = '';
+			// element.innerHTML = '<h3>Thank you for your payment!</h3>';
+			// Or go to another URL:  actions.redirect('thank_you.html');
+		});
+	}
 
 
-	}).render('#paypal-button-container');
+}).render('#paypal-button-container');
+
 </script>
 {% endblock %}

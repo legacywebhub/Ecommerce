@@ -447,6 +447,52 @@ def checkout(request):
 
 
 
+def success(request, pk):
+    order = Order.objects.get(id=pk)
+
+    if not order.complete:
+        messages.error(request, 'This order has not been paid for or completed')
+        return redirect('/checkout/')
+
+    items =  []
+    physical = False
+
+    # Looping through order items to get all digital products
+    for item in order.orderitem_set.all():
+        if item.product.digital:
+            items.append(item)
+
+    # Checking through to check if physical item for shipping
+    for item in order.orderitem_set.all():
+        if not item.product.digital:
+            physical = True
+            break
+
+    item_total = order.item_total
+    total = order.total
+
+    if request.method == 'POST':
+        search = request.POST['search']
+        return redirect('/products/'+search)
+
+    context = {
+        'items': items,
+        'order': order,
+        'item_total': item_total,
+        'total': total, 
+        'customer': order.customer, 
+        'company': company,
+        'categories' : categories,
+        'hot_products':hot_products,
+        'physical': physical
+    }
+
+    return render(request, 'success.html', context)
+
+    
+
+
+
 def faq(request):
     # Getting our customer and his order
     order_data = getCustomerAndOrder(request)
@@ -684,9 +730,9 @@ def processOrder(request):
 
     print('order saved')
 
-    # Saving shipping detail of customer
+    # Saving shipping detail for current order
     if order.shipping == True:
-        shipping_details = Shipping.objects.create(
+        shipping = Shipping.objects.create(
             customer=customer,
             order=order,
             address=data['shippingFormData']['address'],
@@ -698,8 +744,8 @@ def processOrder(request):
             phone1=data['shippingFormData']['phone1'],
             phone2=phone2,
         )
-        shipping_details.save()
+        shipping.save()
 
-    print('shipping details saved')
+    print('shipping saved')
     
     return JsonResponse('Payment and checkout was successful', safe=False)

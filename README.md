@@ -11,13 +11,13 @@ product detail, product category, error pages(404 and 500) and password reset pa
 * Special offers page which includes products with discount of 15% and above and free
   shipping.
 * Visitors can make purchases without signing up but can't have access to special offers.
-* Payment integration with paystack.
+* Payment integration with paystack and paypal.
 * Error 404 and 500 pages implemented to handle error pages.
 * Password reset functionality.
 * Sitemap to boost SEO.
-* Secured.
+* Newsletter functionality
 * Configured to use cloudinary cloud storage to serve media files.
-* Configured for heroku hosting.
+* Secured.
 
 # Libraries/Packages
 python-3.7

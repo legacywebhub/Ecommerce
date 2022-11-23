@@ -25,7 +25,7 @@
 		{% endif %}
 		<div class="caption">
 			<h5 style="text-transform: capitalize;">{{hot_product.name}}</h5>
-			<h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' hot_product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn update-cart" data-product="{{ product.id }}" data-action="add">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{hot_product.discount_price}}</a></h4>
+			<h4 style="text-align:center"><a class="btn" href="{% url 'Store:detail' hot_product.id %}"> <i class="icon-zoom-in"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{hot_product.discount_price}}</a> <!--<a class="btn update-cart" data-product="{{ product.id }}" data-action="add">Add to <i class="icon-shopping-cart"></i></a> <a class="btn btn-primary" href="#">{{company.currency_symbol}}{{hot_product.discount_price}}</a>--></h4>
 		</div>
 		</div><br/>
 		{% endfor %}
