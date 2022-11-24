@@ -1,6 +1,7 @@
 from unicodedata import decimal
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 # Imports for newletter
 from django.core.mail import send_mail, EmailMessage
 from django_pandas.io import read_frame
@@ -95,7 +96,7 @@ class MyUserManager(BaseUserManager):
 
 
 # Custom user model class
-class MyUser(AbstractBaseUser):
+class MyUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(verbose_name="first name", max_length=60)
     last_name = models.CharField(verbose_name="last name", max_length=60)
     username = models.CharField(verbose_name="username", max_length=30, unique=True, null=True, blank=True)

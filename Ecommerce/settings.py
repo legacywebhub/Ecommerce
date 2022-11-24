@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'bootshop.herokuapp.com']
 
 INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -163,6 +164,12 @@ EMAIL_USE_TLS = True
 # Deployment settings
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', cast=bool)
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', cast=bool)
+
+# JAZZMIN SETTINGS
+JAZZMIN_SETTINGS = {
+    "site_title": "Bootshop Admin",
+    "site_header": "BOOTSHOP ADMIN"
+}
 
 
 # HEROKU SETTINGS
