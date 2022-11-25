@@ -32,7 +32,8 @@ urlpatterns = [
 
     # Pseudo urls and paths
     path('update_item/', views.updateItem, name='update_item'),
-    path('process_order/', views.processOrder, name='process_order'),
+    path('process_shipping_order/', views.processShippingOrder, name='process_shipping_order'),
+    path('process_nonshipping_order/', views.processNonShippingOrder, name='process_nonshipping_order'),
 
     # Authentication url and paths
     path('login/', views.login, name='login'),

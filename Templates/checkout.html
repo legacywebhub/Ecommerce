@@ -220,27 +220,47 @@
 <script type="text/javascript">
 	//THIS ENTIRE SCRIPT CODE IS FOR CHECKOUT AND PAYMENT PROCESSING
 
-	/*
-	This code checks our order if we have a non digital or physical item
-	on our order Items. If we have then we display shipping-info form. 
-	else we hide the form
-	*/
+	// GLOBAL VARIABLES
+
 	let shipping = "{{order.shipping}}",
 		total = parseInt("{{order.total}}"),
 		shippingContainer = document.getElementById('shipping-container'),
-		shippingForm = document.getElementById('shipping-form'),
+		orderForm = document.getElementById('shipping-form'),
 		formButton = document.getElementById('shipping-form-submit-button'),
 		paymentContainer = document.getElementById('payment-container'),
 		paystackBtn = document.getElementById('paystack'),
 		flutterwaveBtn = document.getElementById('flutterwave'),
-		shippingFormData = null;
+		orderFormData,
+		url;
 	
-		paystackBtn.addEventListener('click', function(e){
-			e.preventDefault();
-			console.log('Paystack button clicked')
-			payWithPaystack();
-		})
-				 
+	
+
+	// FUNCTIONAL CODE BLOCK
+
+	/*
+	this function is to provide an email. Paystack needs this for payment
+	*/
+	var email;
+
+	if (document.getElementById('email') == null) {
+		email = "{{user.email}}";
+	} else {
+		email = document.getElementById('email').value;
+	}
+
+	// set a default email
+	if (email == "" || email == " ") {
+		email = "anonymous@gmail.com";
+	}
+
+	console.log(email);
+
+	/*
+	The following code checks our order if we have a non digital or physical item
+	on our order Items. If we have then we display shipping-info form. 
+	else we hide the form
+	*/
+
 	//payment container is set hidden by default with this line
 	paymentContainer.classList.add("hidden")
 
@@ -252,15 +272,24 @@
 
 	//this is for authenticated users having only digital products to pay for
 	if (shipping == 'False' && user != 'AnonymousUser'){
+
 		//hide entire form container if user is logged in and shipping is false
 		shippingContainer.classList.add("hidden");
-		//show payment if user wants to pay for an item that is digital
+		//show payment box so he can pay
 		paymentContainer.classList.remove("hidden");
+
 	} else if (shipping == 'False' && user == 'AnonymousUser') {
+
+	//this is for anonymous users having only digital products to pay for
 		paymentContainer.classList.remove("hidden");
+			
 	}
-    
-	shippingForm.addEventListener('submit', (e)=>{
+
+
+
+	// EVENT LISTENERS
+
+	orderForm.addEventListener('submit', (e)=>{
 		e.preventDefault()
 		//hide shipping form button
 		formButton.classList.add("hidden");
@@ -272,53 +301,56 @@
 			console.log('Flutterwave button clicked')
 		})
 	})
+
+	paystackBtn.addEventListener('click', function(e){
+			e.preventDefault();
+			console.log('Paystack button clicked')
+			payWithPaystack();
+	})
 	
 
-	//Functions
+
+	//FUNCTIONS
+
+	// Paystack function
 	function payWithPaystack() {
 
-	let email;
+		const paystack = new PaystackPop();
 
-	if (document.getElementById('email') == null) {
-		email = "{{user.email}}";
-	} else {
-		email = document.getElementById('email').value;
+		paystack.newTransaction({
+
+			key: '{{public_key}}', // Replace with your public key
+
+			email: email,
+
+			amount: total * 100, // the amount value is multiplied by 100 to convert to the lowest currency unit
+
+			currency: "NGN", // Use GHS for Ghana Cedis or USD for US Dollars
+
+			ref: "" + Math.floor(Math.random() * 1000000000 + 1), // Replace with a reference you generated
+
+			onSuccess: (transaction) => {
+				// Payment complete! Reference: transaction.reference
+				submitFormData(transaction.reference);
+			},
+		
+			onCancel: () => {
+				// user closed popup
+				alert('Payment aborted');
+			}
+
+		});
 	}
 
 
-	const paystack = new PaystackPop();
-
-	paystack.newTransaction({
-
-		key: '{{public_key}}', // Replace with your public key
-
-		email: email,
-
-		amount: total * 100, // the amount value is multiplied by 100 to convert to the lowest currency unit
-
-		currency: "NGN", // Use GHS for Ghana Cedis or USD for US Dollars
-
-		ref: "" + Math.floor(Math.random() * 1000000000 + 1), // Replace with a reference you generated
-
-		onSuccess: (transaction) => {
-			// Payment complete! Reference: transaction.reference
-			console.log('success', transaction.reference)
-			submitFormData(transaction.reference);
-		},
-	
-		onCancel: () => {
-			// user closed popup
-			alert('Payment aborted');
-		}
-
-	});
-	}
-
+	// Function to decide our order form data for submission
 	function submitFormData(ref){
-		let url = '/process_order/'
 
-		if (shipping == 'True'){
-			shippingFormData = {
+		if (shipping == 'True') {
+
+			url = '/process_shipping_order/';
+
+			orderFormData = {
 				'first-name': document.getElementById('first-name').value,
 				'last-name': document.getElementById('last-name').value,
 				'address': document.getElementById('address').value,
@@ -333,40 +365,59 @@
 				'total': total,
 				'transaction-id':ref
 			}
-			
-			console.log(shippingFormData)
 
-			fetch(url, {
-				method: "POST",
-				headers: {
-					'Content-Type': 'application/json',
-					'X-CSRFToken': csrftoken,
-				},
-				body: JSON.stringify({'shippingFormData':shippingFormData})
-			})
-			.then((response)=>{
-				data = response.json()
-				console.log('success:', data)
-				return data
-			})
-			.then((data)=>{
-				if (confirm(`Transaction was succesful!  Reference Id: ${ref}`)) {
-					success(ref);
-				}
-				success(ref);
-			})
-		} else {
-			success(ref);
+		} else if (shipping == 'False') {
+
+			url = '/process_nonshipping_order/';
+
+			orderFormData = {
+				'order': "{{order.id}}",
+				'total': total,
+				'transaction-id':ref
+			}
+
 		}
+
+		console.log(orderFormData);
+
+		fetchData(url, orderFormData, ref);
 
 	}
 
+
+	// Function to fetch and complete order on backend
+	function fetchData(url, data, ref){
+		fetch(url, {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,
+			},
+			body: JSON.stringify({'orderFormData':data})
+		})
+		.then((response)=>{
+			data = response.json()
+			console.log('success:', data)
+			return data
+		})
+		.then((data)=>{
+			if (confirm(`Transaction was succesful!  Reference Id: ${ref}`)) {
+				success(ref);
+			}
+			success(ref);
+		})
+	}
+
+
+	// Function to run after successful payment
 	function success(ref) {
 		document.getElementById('success-message').innerText = `Transaction was succesful!  Reference Id: ${ref}`;
 		sessionStorage.setItem('successMessage', `Transaction reference Id: ${ref}`);
 		window.location.href = "/success/{{order.id}}/";
 	}
 
+
+	// Paypal function
 	// Render the PayPal button into #paypal-button-container
 	paypal.Buttons({
 	
@@ -397,6 +448,7 @@
 		});
 	}
 
+	// Note that that no DOM element should bear an ID of paypal else this won't work
 
 }).render('#paypal-button-container');
 

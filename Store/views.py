@@ -694,16 +694,16 @@ def updateItem(request):
 
 
 
-def processOrder(request):
+def processShippingOrder(request):
     data = json.loads(request.body)
     print('data:', data)
-    first_name = data['shippingFormData']['first-name']
-    last_name = data['shippingFormData']['last-name']
-    phone2 = data['shippingFormData']['phone2']
+    first_name = data['orderFormData']['first-name']
+    last_name = data['orderFormData']['last-name']
+    phone2 = data['orderFormData']['phone2']
 
     # Checking to see if phone2 is empty since it isn't mandactory
     # Set as None if an empty string
-    if phone2 == '':
+    if phone2 == '' or phone2 == "None":
         phone2 = None
 
     try:
@@ -715,12 +715,12 @@ def processOrder(request):
         customer, created = Customer.objects.get_or_create(device=device)
         # Populating the customer field
         customer.name = f'{first_name} {last_name}'
-        customer.email = data['shippingFormData']['email']
+        customer.email = data['orderFormData']['email']
         customer.save()
         print('customer saved')
     order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    order.transaction_id = data['shippingFormData']['transaction-id']
-    total = data['shippingFormData']['total']
+    order.transaction_id = data['orderFormData']['transaction-id']
+    total = data['orderFormData']['total']
 
     # Making sure total on the frontend equals total on the backend
     # Frontend may be manipulated using browser inspection tool
@@ -735,17 +735,49 @@ def processOrder(request):
         shipping = Shipping.objects.create(
             customer=customer,
             order=order,
-            address=data['shippingFormData']['address'],
-            apartment=data['shippingFormData']['apartment'],
-            city=data['shippingFormData']['city'],
-            state=data['shippingFormData']['state'],
-            country=data['shippingFormData']['country'],
-            zipcode=data['shippingFormData']['zipcode'],
-            phone1=data['shippingFormData']['phone1'],
+            address=data['orderFormData']['address'],
+            apartment=data['orderFormData']['apartment'],
+            city=data['orderFormData']['city'],
+            state=data['orderFormData']['state'],
+            country=data['orderFormData']['country'],
+            zipcode=data['orderFormData']['zipcode'],
+            phone1=data['orderFormData']['phone1'],
             phone2=phone2,
         )
         shipping.save()
 
     print('shipping saved')
     
+    return JsonResponse('Payment and checkout was successful', safe=False)
+
+
+
+
+
+def processNonShippingOrder(request):
+    data = json.loads(request.body)
+    print('data:', data)
+
+    try:
+        # Trying to get customer from authenticated user
+        customer = request.user.customer
+    except:
+        # Creating a customer using his device ID from browser
+        device = request.COOKIES['device']
+        customer, created = Customer.objects.get_or_create(device=device)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    order.transaction_id = data['orderFormData']['transaction-id']
+    total = data['orderFormData']['total']
+
+    # Making sure total on the frontend equals total on the backend
+    # Frontend may be manipulated using browser inspection tool
+    # Order is set to delivered because the frontend would redirect
+    # to download page automatically after Json response is delivered
+    if total == order.total:
+        order.complete = True
+        order.delivered = True
+    order.save()
+
+    print('order saved')
+
     return JsonResponse('Payment and checkout was successful', safe=False)

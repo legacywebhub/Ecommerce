@@ -57,8 +57,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 class OrderAdmin(admin.ModelAdmin):
     exclude = ()
-    list_display = ('id', 'customer_name', 'total', 'complete', 'delivered',)
-    list_filter = ('date_ordered', 'complete', 'delivered',)
+    list_display = ('id', 'customer_name', 'total', 'complete', 'shipping', 'delivered')
+    list_filter = ('date_ordered', 'complete', 'shipping', 'delivered')
     list_per_page = 20
 
 
