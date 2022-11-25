@@ -5,13 +5,14 @@ from django.contrib.auth.models import PermissionsMixin
 # Imports for newletter
 from django.core.mail import send_mail, EmailMessage
 from django_pandas.io import read_frame
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 
 
 # Create your models here.
 
 # This model holds general values, ads, address, links and other info of our site or app 
 class CompanyInfo(models.Model):
-    logo = models.ImageField(upload_to="Images/Company", blank=True, null=True)
+    logo = models.ImageField(upload_to="images/company", blank=True, null=True)
     name = models.CharField(max_length=150, blank=False, null=False)
     address = models.CharField(max_length=150, blank=True, null=True)
     country = models.CharField(max_length=60, blank=True, null=True)
@@ -217,14 +218,14 @@ class Product(models.Model):
     name = models.CharField(max_length=200, null=False, blank=False)
     brand = models.CharField(max_length=200, null=True, blank=True)
     model = models.CharField(max_length=200, null=True, blank=True)
-    image1 = models.ImageField(upload_to='Images/Products',blank=True, null=True)
-    image2 = models.ImageField(upload_to='Images/Products',blank=True, null=True)
-    image3 = models.ImageField(upload_to='Images/Products',blank=True, null=True)
+    image1 = models.ImageField(upload_to='images/products',blank=True, null=True)
+    image2 = models.ImageField(upload_to='images/products',blank=True, null=True)
+    image3 = models.ImageField(upload_to='images/products',blank=True, null=True)
     image_url1 = models.URLField(max_length=3000, blank=True, null=True)
     image_url2 = models.URLField(max_length=3000, blank=True, null=True)
     image_url3 = models.URLField(max_length=3000, blank=True, null=True)
     digital = models.BooleanField(default=False, null=False, blank=False)
-    file = models.FileField(upload_to="Documents/Products", blank=True, null=True)
+    file = models.FileField(upload_to="documents/products", blank=True, null=True, help_text="document file formats i.e pdf", storage=RawMediaCloudinaryStorage())
     file_link = models.URLField(max_length=3000, blank=True, null=True)
     size = models.CharField(max_length=100, blank=True, null=True)
     dimensions = models.CharField(max_length=100, blank=True, null=True)
@@ -472,54 +473,3 @@ class Message(models.Model):
         return f'{self.date_received}'
 
 
-
-
-
-# This model mails our users on products or updates before saving
-class Newsletter(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
-    subject = models.CharField(max_length=160, blank=False, null=False)
-    file = models.FileField(upload_to='Images/Newsletter', null=True, blank=True)
-    body = models.TextField(max_length=5000, null=True, blank=True)
-    sent_mail = models.BooleanField(default=False)
-
-    def __str__(self):
-        return(f'{str(self.date_created)}   {self.subject}')
-
-    # Save method to send mails before saving
-    # sent_mail will be False if there was an error before saving
-    # sent_mail will be True if mail was sent successfully
-    # remove try blocks to see errors in real time
-    def save(self, *args, **kwargs):
-        company = CompanyInfo.objects.last()
-        users = MyUser.objects.all()
-
-        #converts an email query to a list object
-        #using the read_frame function from django-pandas external module
-        df = read_frame(users, fieldnames=['email'])
-        mail_list = df['email'].values.tolist()
-    
-        if bool(self.file) == True:
-            try:
-                # Checking if there is a file
-                email = EmailMessage(self.subject, self.body, company.email1, mail_list)
-                email.content_subtype = 'html'
-                email.attach(self.file.name, self.file.read())
-                email.send()
-                self.sent = True
-                print('Newsletter with file(s) was successfully sent to users...')
-            except:
-                print('Sorry... an error occured while trying to send newsletter with file(s)')
-        else:
-            try:
-                # If there's no file
-                send_mail(
-                self.subject, self.body, company.email1, mail_list, fail_silently=False
-                )
-                self.sent = True
-                print(f'Newsletter was successfully sent to users...')
-            except:
-                print('Sorry... an error occured while trying to send newsletter')
-        # We don't intend to save newsletter images so we set file to None
-        self.file = None
-        super().save(*args, **kwargs)

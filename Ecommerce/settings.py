@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'cloudinary_storage',
+    'cloudinary',
     'Store',
 ]
 
@@ -137,8 +139,15 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR / 'Static'),)
 STATIC_ROOT = os.path.join(BASE_DIR / 'staticfiles')
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR / 'Media')
+MEDIA_URL = '/eshop/'
+MEDIA_ROOT = os.path.join(BASE_DIR / 'eshop')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+    'INVALID_VIDEO_ERROR_MESSAGE': 'Please upload a valid video file.',
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

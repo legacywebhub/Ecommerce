@@ -79,14 +79,6 @@ class MessageAdmin(admin.ModelAdmin):
 
 
 
-class NewsletterAdmin(admin.ModelAdmin):
-    exclude = ()
-    list_display = ('date_created', 'subject',)
-    list_filter = ('date_created', 'sent_mail',)
-    list_per_page = 20
-
-
-
 class OrderItemAdmin(admin.ModelAdmin):
     exclude = ()
     list_display = ('__str__', 'order', 'quantity')
@@ -106,5 +98,4 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem, OrderItemAdmin)
 admin.site.register(Shipping, ShippingAdmin)
-admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(Message, MessageAdmin)
